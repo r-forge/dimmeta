@@ -31,11 +31,12 @@
 #' exactly as \code{dimname}s. It is lost when dimensions are dropped on
 #' subsetting operations.    
 #' 
-#' \section{Methods}{
-#' \link[base:UseMethod]{Methods} to \link[base:InternalMethods]{standard 
-#' generics} for "\code{marray}" objects currently include: 
-#' \code{\link[print.marray]{print}}, the \code{\link[Extract.mframe]{[}}
-#' extract operator, \code{\link[rbind.marray]{rbind}} and 
+#' \link[base:UseMethod]{Methods} to 
+#' \link[base:InternalMethods]{standard generics} for "\code{marray}" objects 
+#' currently include: 
+#' \code{\link[=print.marray]{print}}, the 
+#' \code{\link[=Extract.marray]{[}} extract operator, 
+#' \code{\link[=rbind.marray]{rbind}} and 
 #' \code{cbind}. All these allow to keep the metadata along the dimensions
 #' in sync with manipulations to the array data.
 #'
@@ -43,7 +44,7 @@
 #' for obvious reasons: how to change \code{dimmeta} would be undefined
 #' in most cases. 
 #' 
-#' New generic functions \code{\link{dimmeta}} and \code{dimmeta <- } allow 
+#' New generic functions \code{\link{dimmeta}} and \code{dimmeta<-} allow 
 #' to get and replace the metadata. The default implementations
 #' get and set the \code{dimmeta} attribute --irrespective of whether 
 #' the object is of class \code{marray}--, but the correct subsetting
@@ -55,11 +56,10 @@
 #' 
 #' In all other respects, \code{marray}s behave exactly as standard
 #' \code{array}s.
-#' }
 #' 
 #' @title Arrays with Metadata along Dimensions
 #' @name marray
-#' @aliases is.marray as.marray as.marray.default as.marray.marray
+#' @aliases marray is.marray as.marray as.marray.default as.marray.marray
 #' 	print.marray
 #' @usage
 #' marray(data = NA, dim = length(data), dimnames = NULL,
@@ -88,7 +88,7 @@
 #' @param x an \R object.
 #'  
 #' @return \code{marray} creates \code{marray}s exactly in the same way as 
-#' 	\code{\link[base]{array}} (with the extents specified in \code{dim} and 
+#' 	\code{\link{array}} (with the extents specified in \code{dim} and 
 #'  naming information in \code{dimnames}), plus additional metadata
 #'  for each dimension specified in \code{dimmeta}.
 #' 
@@ -100,13 +100,13 @@
 #'  its argument is an array and, furthermore, is of class \code{marray}. 
 #'  Realize that the \code{dimmeta} attribute is optional, so we may have
 #'  \code{marray}s without it --although this is not common.
-#'  \code{is.marray} is a generic function: \link[base:UseMethod]{methods} 
+#'  \code{is.marray} is a generic function: \link[=UseMethod]{methods} 
 #'  can be written to handle specific classes of objects.
 #' 
 #' @author Enrique Bengoechea, based on a suggestion by Henrik Bengtsson 
 #'  on the R-devel mailing list. Thanks also to Tony Plate, Heinz Tuechler,
 #'  and Laurent Gautier for their feedback.
-#' @seealso \code{\link[base]{array}}.
+#' @seealso \code{\link{array}}.
 #' 
 #'  "Annotations" on the \pkg{Biobase} package have a similar meaning to
 #'  "metadata" as used here. See class 

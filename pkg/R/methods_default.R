@@ -9,7 +9,7 @@
 
 #' @title Get or Set Metadata along Array Dimensions
 #' @name dimmeta
-#' @aliases dimmeta.default `dimmeta<-.default` 
+#' @aliases dimmeta dimmeta.default `dimmeta<-.default` 
 #' 	rowmeta rowmeta.default `rowmeta<-` `rowmeta<-.default`
 #' 	colmeta colmeta.default `colmeta<-` `colmeta<-.default`
 #' @usage 

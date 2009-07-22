@@ -17,7 +17,7 @@
 #' 
 #' @title Extract Parts of Arrays with Metadata
 #' @name Extract.marray
-#' @aliases [.marray 
+#' @aliases Extract.marray [.marray 
 #' @usage 
 #' 	\method{[}{marray}(x, ..., drop = TRUE)
 #'  
@@ -32,7 +32,7 @@
 #' @param value a suitable replacement value: it will be repeated a whole 
 #'  number of times if necessary.	 
 #' 
-#' @seealso \link[base:Extract]{[ extraction} for arrays.
+#' @seealso \link[base:Extract]{[} operator for arrays.
 #' @S3method `[` marray
 #  NOTE: The replacement method is not needed: indexes outside bounds 
 # 		 raise an error with arrays.
@@ -95,15 +95,17 @@
 #' \code{NA}s (for atomic vectors) or \code{NULL}s (for lists). 
 #' 
 #' @title Combine marrays by Rows or Columns
-#' @aliases cbind.marray
+#' @aliases rbind.marray cbind.marray
 #' @usage
 #'  \method{rbind}{marray}(..., deparse.level = 1)
+#' 
 #'  \method{cbind}{marray}(..., deparse.level = 1)
 #' 
-#' @param \dots
-#' @param deparse.level
+#' @param \dots objects to be combined.
+#' @param deparse.level integer controlling the construction of labels in 
+#' 	the case of non-matrix-like arguments: see \code{\link[=cbind]{rbind}}. 
 #' 
-#' @return An \code{marray} with 2 dimensions (an "mmatrix") combining the 
+#' @return An \code{marray} with 2 dimensions (an "mmatrix"!) combining the 
 #' 	\dots arguments column-wise or row-wise.
 #'  
 #'  For \code{cbind} row data is taken from the first argument with 
