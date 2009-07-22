@@ -1,0 +1,15 @@
+Package: metadata
+Type: Package
+Title: Arrays and Data Frames with Metadata
+Version: 0.0-1
+Date: 2009-07-06
+Author: Enrique Bengoechea <enrique.bengoechea@credit-suisse.com>,
+Maintainer: Enrique Bengoechea <enrique.bengoechea@credit-suisse.com>
+Description: Adds metadata attributes to arrays and data frames 
+	that evolve "along each dimension" and are kept through indexing 
+	operations
+Depends: R (>= 2.8.1)
+Imports: piUtils
+Suggests: svUnit
+License: GPL-2
+LazyLoad: yes
