@@ -17,6 +17,7 @@ s("generics.R")
 s("methods_default.R")
 s("darray.R")
 s("darray_subset.R")
+s("darray_bind.R")
 
 s("mframe.R")
 s("mframe_subset.R")

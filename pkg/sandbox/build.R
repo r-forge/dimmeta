@@ -34,7 +34,9 @@ toRm <- c(
 	"unmeta", "unmeta.default",
 	"cbind.darray",
 	"dimReplace.darray",
-	"indexLenSelection"
+	"indexLenSelection",
+	"metabind.default", "metabind.list", "metabind.matrix", 
+		"metabind.data.frame"	
 );
  
 unlink(file.path(devPath(), "man", paste(toRm, ".Rd", sep="")))

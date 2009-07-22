@@ -1,6 +1,9 @@
 
 Version 0.1-1 [?]
 
+ o New implementation of rbind.darray and cbind.darray to work
+   with 2-dim objects and allows new classes using the new
+   generic function "metabind"
  o Package renamed from "metadata" to "dimmeta"
  o "darray" class renamed to "darray"
  o Added S3 generic "unmeta"

@@ -211,37 +211,101 @@ test_replace_dimmeta <- svTest(function() {
 		"lengths for each dimension must match");
 })
 
-test_rbind <- svTest(function() {
-	# With vectors --elements without metadata become NA
+test_rbind_vectorMeta <- svTest(function() {
 	x <- darray(1:6, dim=c(2, 3), dimmeta=list(letters[1:2], LETTERS[1:3]));
 	y <- darray(10, dim=c(1, 3), dimmeta=list("j", c("X1", "X2", "X3")));
+
+	checkEquals(rbind(x, y), rbind(integer(0), x, NULL, y),
+		"elements with zero-length are ignored by rbind");		
 	
 	checkEquals(darray(c(1, 2, 10, 3, 4, 10, 5, 6, 10), dim=c(3, 3), 
 			dimmeta=list(c("a", "b", "j"), LETTERS[1:3])),
-		rbind(x, y));
+		rbind(x, y),
+		"rbind atomic vector dimmeta with all elements");
 
 	checkEquals(darray(c(1, 1, 2, 1, 3, 4, 1, 5, 6), dim=c(3, 3), 
 			dimmeta=list(c(NA_character_, letters[1:2]), LETTERS[1:3])),
-		rbind(1, x));
+		rbind(1, x),
+		"rbind atomic vector dimmeta with objects without dimmeta produces NAs");
 		
-	# With lists --elements without metadata become list(NULL)
 	xl <- darray(1:6, dim=c(2, 3), 
 		dimmeta=list(list("a", "b"), list("A", "B", "C")));
-
 	checkEquals(darray(c(1, 2, 1, 2, 3, 4, 3, 4, 5, 6, 5, 6), dim=c(4, 3), 
 			dimmeta=list(list("a", "b", "a", "b"), list("A", "B", "C"))),
-		rbind(xl, xl));
+		rbind(xl, xl),
+		"rbind list vector dimmeta with all elements");
 
 	checkEquals(darray(c(1, 1, 2, 1, 3, 4, 1, 5, 6), dim=c(3, 3), 
 			dimmeta=list(list(NULL, "a", "b"), list("A", "B", "C"))),
-		rbind(1, xl));
+		rbind(1, xl),
+		"rbind list vector dimmeta with objects without dimmeta produces list(NULL)");
 	
-	# Join lists and vectors --they are coerced to list
 	checkEquals(darray(c(1, 2, 2, 1, 2, 3, 4, 2, 3, 4, 5, 6, 2, 5, 6), 
 			dim=c(5, 3), 
 			dimmeta=list(list("a", "b", NULL, "a", "b"), list("A", "B", "C"))),
-		rbind(xl, 2, x));	
-		
+		rbind(xl, 2, x),
+		"rbinding list and atomic vectors dimmeta coerces all to list");	
+})
+
+test_rbind_dfMeta <- svTest(function() {
+	x <- darray(1:6, dim=c(2, 3), dimmeta=list(
+			data.frame(labels=I(c("r1", "r2")), units=c("m", "cm")),
+			LETTERS[1:3]));	
+
+	y <- darray(1:6, dim=c(1, 3), 
+			dimmeta=list(data.frame(labels=I(c("R3")), units="m"), 
+			c("Y1", "Y2", "Y3")));
+	checkEquals(list(data.frame(
+			labels=I(c("r1", "r2", "R3")), units=c("m", "cm", "m")),
+			LETTERS[1:3]),
+		dimmeta(rbind(x, y)),
+		"rbind darrays with data frame dimmeta does rbind the data frames");	
+
+	# The rules for rbinding the data frames on the dimmeta are followed
+	dimmeta(y) <- list(data.frame(newLabels=I(c("R3")), newUnits="m"), 
+			c("Y1", "Y2", "Y3"));
+	checkException(rbind(x, y), 
+		"variable names must match when combining the dimmeta data frames")
+
+	checkEquals(darray(c(1, 1, 2, 1, 3, 4, 1, 5, 6), dim=c(3, 3), 
+			dimmeta=list(
+				data.frame(labels=I(c(NA_character_, "r1", "r2")), 
+					units=c(NA, "m", "cm")),
+				LETTERS[1:3])),
+		rbind(1, x), 
+		"rbind data frame dimmeta with objects without dimmeta produces NAs");
+
+	dimmeta(y) <- list(c("R4"), c("Y1", "Y2", "Y3"));	
+	checkEquals(darray(c(1, 2, 2, 1, 3, 4, 2, 2, 5, 6, 2, 3), dim=c(4, 3), 
+			dimmeta=list(
+				data.frame(labels=I(c("r1", "r2", NA_character_, "R4")), 
+					units=c("m", "cm", NA, NA)),
+				LETTERS[1:3])), 
+		suppressWarnings(rbind(x, 2, y)),
+		"rbind data frame with vector dimmeta does rbind them");	
+});
+
+test_rbind_arrayMeta <- svTest(function() {
+	x <- darray(1:6, dim=c(2, 3), 
+		dimmeta=list(matrix(10:13, 2, 2), matrix(letters[1:6], 3, 2)));	
+	
+	checkEquals(darray(c(1, 2, 10, 1, 2, 3, 4, 15, 3, 4, 5, 6, 20, 5, 6), 
+			dim=c(5, 3), 
+			dimmeta=list(
+				rbind(matrix(10:13, 2, 2), c(NA_real_, NA_real_), 
+					matrix(10:13, 2, 2)),
+    			matrix(letters[1:6], 3, 2))),
+		rbind(x, c(10, 15, 20), x),
+		"rbind several arrays dimmeta with a plain vector");
+
+	d1 <- matrix(10:13, 2, 2, dimnames=list(NULL, c("labels", "units")));
+	d2 <- data.frame(labels=I(c("R3")), units="m");
+	x <- darray(1:6, dim=c(2, 3), dimmeta=list(d1, matrix(letters[1:6], 3, 2)));		
+	y <- darray(1:3, dim=c(1, 3), dimmeta=list(d2, c("Y1", "Y2", "Y3")));
+	checkEquals(darray(c(1, 2, 1, 3, 4, 2, 5, 6, 3), dim=c(3, 3),
+			dimmeta=list(rbind(d1, d2), c("Y1", "Y2", "Y3"))), 
+		rbind(x, y),
+		"rbind array & data frame dimmeta does result in a data frame");
 })
 
 test_cbind <- svTest(function() {
