@@ -136,6 +136,31 @@ test_extract_dimdata <- svTest(function() {
 		dimdata(x, use.dimnames=TRUE));
 })
 
+test_replace_dimdata <- svTest(function() {
+	x <- marray(1:6, dim=c(2, 3), dimdata=list(letters[1:2], LETTERS[1:3]));
+	
+	checkEquals(list(letters[1:2], LETTERS[1:3]), dimdata(x));
+
+	dimdata(x) <- list(c("r", "j"), c("X1", "X2", "X3"))
+	checkEquals(list(c("r", "j"), c("X1", "X2", "X3")), dimdata(x));
+
+	dimdata(x)[[1L]] <- c("r1", "j1");
+	checkEquals(list(c("r1", "j1"), c("X1", "X2", "X3")), dimdata(x));
+	
+	dimdata(x) <- list(c("a", "b"))
+	checkEquals(list(c("a", "b"), NULL), dimdata(x));
+	
+	dimdata(x) <- NULL;
+	checkEquals(NULL, dimdata(x));
+	checkEquals("marray", class(x));
+	
+	checkException(dimdata(x) <- letters[1:6], "value must be a list");
+	checkException(dimdata(x) <- list(letters[1:2], LETTERS[1:3], 1:2), 
+		"number of dimensions must be lower or equal");
+	checkException(dimdata(x) <- list(letters[1], LETTERS[1:4]), 
+		"lengths for each dimension must match");
+})
+
 test_rbind <- svTest(function() {
 	# With vectors --elements without metadata become NA
 	x <- marray(1:6, dim=c(2, 3), dimdata=list(letters[1:2], LETTERS[1:3]));

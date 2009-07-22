@@ -102,21 +102,25 @@ dimdata.default <- function(x, use.dimnames=FALSE) {
 #' @S3method `dimdata<-` default
 
 `dimdata<-.default` <- function(x, value) {
-	if (!is.list(value))
-		stop(gettextf("'%s' must be a list", "dimdata"));
 	xDim <- dim(x);
 	if (is.null(xDim))
 		stop("'%s' cannot be applied to objects without dimensions");
-	if (length(value) > length(xDim))
-		stop(gettextf("length of '%s' [%d] must match that of 's' [%d]",
-			"dimdata", length(value), "dims", length(xDim)));
 	
-	for (i in seq_along(value))
-		if (length(value[[i]]) != xDim[i])
-			stop(gettextf("length of '%s' [%d] not equal to array extent",
-				"dimdata", i));						
-
-	length(value) <- length(xDim);
+	if (!is.null(value)) {
+		if (!is.list(value))
+			stop(gettextf("'%s' must be a list", "dimdata"));
+    	
+		if (length(value) > length(xDim))
+			stop(gettextf("length of '%s' [%d] must match that of 's' [%d]",
+				"dimdata", length(value), "dims", length(xDim)));
+		
+		for (i in seq_along(value))
+			if (length(value[[i]]) != xDim[i])
+				stop(gettextf("length of '%s' [%d] not equal to array extent",
+					"dimdata", i));						
+	
+		length(value) <- length(xDim);
+	}
 	attr(x, "dimdata") <- value;
 	x;
 }	
