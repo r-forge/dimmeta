@@ -10,7 +10,7 @@
 #y <- as.array(x)
 #dimnames(y) <- list(paste("r", 1:2, sep=""), paste("c", 1:3, sep="")) 
 
-test_marrayWithoutDimattr <- svTest(function() {		
+test_marray_withoutDimattr <- svTest(function() {		
 	x <- marray(1:6, dim=c(2, 3))
 	
 	checkTrue(inherits(x, "marray"));
@@ -22,7 +22,7 @@ test_marrayWithoutDimattr <- svTest(function() {
 	checkEquals(NULL, dimdata(x));
 })
 
-test_simpleMarray <- svTest(function() {	
+test_simple_marray <- svTest(function() {	
 	xda <- list(letters[1:2], LETTERS[1:3]);
 	x <- marray(1:6, dim=c(2, 3), dimdata=xda);
 	
@@ -170,3 +170,34 @@ test_rbind <- svTest(function() {
 })
 
 test_cbind <- svTest(function() {
+	# With vectors --elements without metadata become NA
+	x <- marray(1:6, dim=c(2, 3), dimdata=list(letters[1:2], LETTERS[1:3]));
+	y <- marray(10, dim=c(2, 1), dimdata=list(c("j", "w"), "X1"));
+	
+	checkEquals(marray(c(1, 2, 3, 4, 5, 6, 10, 10), dim=c(2, 4), 
+			dimdata=list(c("a", "b"), c("A", "B", "C", "X1"))),
+		cbind(x, y));
+
+	checkEquals(marray(c(1, 1, 1:6), dim=c(2, 4), 
+			dimdata=list(letters[1:2], c(NA_character_, "A", "B", "C"))),
+		cbind(1, x));
+		
+	# With lists --elements without metadata become list(NULL)
+	xl <- marray(1:4, dim=c(2, 2), 
+		dimdata=list(list("w", "j"), list("X1", "X2")));
+
+	checkEquals(marray(c(1:4, 1:4), dim=c(2, 4), 
+			dimdata=list(list("w", "j"), list("X1", "X2", "X1", "X2"))),
+		cbind(xl, xl));
+
+	checkEquals(marray(c(1:4, -10, -20), dim=c(2, 3), 
+			dimdata=list(list("w", "j"), list("X1", "X2", NULL))),
+		cbind(xl, c(-10, -20)));
+	
+	# Join lists and vectors --they are coerced to list
+	checkEquals(marray(c(1:4, 2, 2, 1:6), 
+			dim=c(2, 6), 
+			dimdata=list(list("w", "j"), list("X1", "X2", NULL, "A", "B", "C"))),
+		cbind(xl, 2, x));	
+		
+})

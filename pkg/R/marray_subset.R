@@ -153,3 +153,61 @@ rbind.marray <- function(..., deparse.level=1) {
 	x;
 } 
 
+#' @nord
+#' @S3method cbind marray
+
+cbind.marray <- function(..., deparse.level=1) {
+	dots <- list(...);	
+	if (length(dots))
+		dots <- dots[sapply(dots, length) > 0L];
+	
+	isList <- FALSE;
+	allNull <- TRUE;	
+    if (length(dots)) {
+		colData <- lapply(dots, function(x) {
+				if (is.matrix(x)) {
+					if (is.marray(x)) {
+						result <- dimdata(x)[[2L]];
+						if (is.list(result))
+							isList <<- TRUE;
+						if (!is.null(result))
+							allNull <<- FALSE; 
+						result;
+					} else 
+						vector(mode="list", nrow(x))
+				} else if (is.vector(x)) {
+					list(NULL)
+				} else NULL;
+			});
+		
+		rowData <- NULL;
+		i <- 1; 
+		while (is.null(rowData) && i <= length(dots)) {
+			x <- dots[[i]];
+			if (is.matrix(x) && is.marray(x) && !is.null(dimdata(x)[[1L]])) {
+				rowData <- dimdata(x)[[1L]];
+				allNull <- FALSE;
+			}
+    		i <- i + 1;
+		} 
+	}
+	
+	x <- do.call("cbind", 
+		c(lapply(dots, as.array), list(deparse.level=deparse.level)));
+
+	if (length(dots) && is.matrix(x) && !allNull) {
+		colData <- if (isList) 
+			do.call("c", colData)				
+		else 
+			unlist(lapply(colData, function(x) {
+					if (is.null(x)) 
+						NA
+					else if (is.list(x) && all(sapply(x, is.null)))
+						rep(NA, length(x))
+					else x
+				}));
+		x <- as.marray(x, dimdata=list(rowData, colData));		
+	}
+		
+	x;
+}
