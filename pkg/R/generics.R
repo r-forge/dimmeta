@@ -1,7 +1,7 @@
 ################################################################################
 # R PACKAGE:   metadata
 # FILE:        R/generics.R
-# DESCRIPTION: Generic functions and their default methods. 
+# DESCRIPTION: Generic functions introduced in this package. 
 # AUTHOR:      Enrique Bengoechea <enrique.bengoechea@credit-suisse.com>
 # CREATED ON:  2009 July 7
 # LICENSE:     GPL-2
@@ -19,7 +19,7 @@ dimdata <- function(x, ...) UseMethod("dimdata");
 
 #' @name dimdataReplace
 #' @nord
-#' @export
+#' @export `dimdata<-`
 
 `dimdata<-` <- function(x, value) UseMethod("dimdata<-");
 
@@ -30,7 +30,7 @@ rowdata <- function(x, ...) UseMethod("rowdata");
 
 #' @name rowdataReplace
 #' @nord
-#' @export
+#' @export `rowdata<-`
 
 `rowdata<-` <- function(x, value) UseMethod("rowdata<-");
 
@@ -41,6 +41,6 @@ coldata <- function(x, ...) UseMethod("coldata");
 
 #' @name coldataReplace
 #' @nord
-#' @export
+#' @export `coldata<-`
 
 `coldata<-` <- function(x, value) UseMethod("coldata<-");

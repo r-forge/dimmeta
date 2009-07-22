@@ -2,14 +2,16 @@ Package: metadata
 Type: Package
 Title: Arrays and Data Frames with Metadata
 Version: 0.0-1
-Date: 2009-07-06
+Date: 2009-07-08
 Author: Enrique Bengoechea <enrique.bengoechea@credit-suisse.com>,
 Maintainer: Enrique Bengoechea <enrique.bengoechea@credit-suisse.com>
-Description: Adds metadata attributes to arrays and data frames 
-	that evolve "along each dimension" and are kept through indexing 
-	operations
+Description: Provides infrastructure to attach metadata attributes to
+    arrays and data frames that evolve "along each dimension" and are
+    kept through subsetting operations.
 Depends: R (>= 2.8.1)
-Imports: piUtils
+Imports: ppTools
 Suggests: svUnit
 License: GPL-2
 LazyLoad: yes
+Collate: 'generics.R' 'marray.R' 'marray_subset.R' 'methods_default.R'
+    'zzz.R'

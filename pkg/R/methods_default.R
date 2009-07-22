@@ -7,7 +7,47 @@
 # LICENSE:     GPL-2
 ################################################################################
 
-#' @nord
+#' @title Get or Set Metadata along Array Dimensions
+#' @name dimdata
+#' @aliases dimdata.default `dimdata<-.default` 
+#' 	rowdata rowdata.default `rowdata<-` `rowdata<-.default`
+#' 	coldata coldata.default `coldata<-` `coldata<-.default`
+#' @usage 
+#'  dimdata(x, ...)
+#'  \method{dimdata}{default}(x, use.dimnames = FALSE)
+#'
+#'  dimdata(x, ...) <- value 
+#'  \method{dimdata}{default}(x, use.dimnames = FALSE) <- value
+#' 
+#'  rowdata(x, ...)
+#'  \method{rowdata}{default}(x, use.rownames = FALSE)
+#'
+#'  rowdata(x, ...) <- value 
+#'  \method{rowdata}{default}(x, use.rownames = FALSE) <- value
+#' 
+#'  coldata(x, ...)
+#'  \method{coldata}{default}(x, use.colnames = FALSE)
+#'
+#'  coldata(x, ...) <- value 
+#'  \method{coldata}{default}(x, use.colnames = FALSE) <- value
+#' 
+#' @param x an \R object, normally an \code{\link{marray}}.
+#' @param use.dimnames logical flag; whether the returned data should
+#' 	have the same \code{dimnames} as \code{x}.
+#' @param use.rownames logical flag; whether the returned data should
+#' 	have the same \code{rownames} as \code{x}.
+#' @param use.colnames logical flag; whether the returned data should
+#' 	have the same \code{colnames} as \code{x}.
+#' @param value a suitable replament value. For \code{dimdata}, 
+#'  either \code{NULL} or a list with one component for each
+#'  dimension that can be \code{NULL} or an object (such as a vector, list, 
+#'	or data frame) whose length equals \code{dim} for that dimension.
+#'	If the list is shorter than the number of dimensions, it is 
+#'  extended by \code{NULL}s to the length required.
+#' 
+#'  For \code{rowdata} and \code{coldata}, the first and second component
+#'  of the \code{dimdata} list, respectively.
+#' 
 #' @S3method dimdata default
 
 dimdata.default <- function(x, use.dimnames=FALSE) {

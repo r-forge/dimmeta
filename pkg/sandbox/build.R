@@ -10,7 +10,7 @@
 
 # 0) Check all unit tests pass on a fresh install:
 library(DevTools);
-devPath(file.path("C:", "ebe", "Work", "Projects", "PaRiS_R", "marray"));
+devPath(file.path("C:", "ebe", "Work", "Projects", "PaRiS_R", "metadata"));
 ut()
 
 # 1) Clear documentation produced in previous runs 
@@ -24,58 +24,14 @@ roxygen()
 #    of objects that are documented together with other objects):
 
 toRm <- c(
-	"metadata.default", "metadata.marray", 
-    "metadataReplace", "metadataReplace.marray",
-    
-	"key.default", "key.dfMetadata", "key.marray",  
-	"keyReplace", "keyReplace.default", "keyReplace.dfMetadata",
-		"keyReplace.marray",
-		
-	"keys.default", "keys.dfMetadata", "keys.marray",  
-	"keysReplace", "keysReplace.default", "keysReplace.dfMetadata",
-		"keysReplace.marray",
-		
-	"paramsReplace", "params.default", "params.dfMetadata", 
-		"params.marray",
-		
-	"varType.default", "varType.varMetadata", 
-		"varType.dfMetadata", "varType.marray", 
-    "varTypeReplace", "varTypeReplace.default", "varTypeReplace.varMetadata",
- 		"varTypeReplace.dfMetadata", "varTypeReplace.marray",
-		
-	"varCoerce.default", "varCoerce.varMetadata", 
-		"varCoerce.dfMetadata", "varCoerce.marray", 
-    "varCoerceReplace", "varCoerceReplace.default", 
-		"varCoerceReplace.varMetadata", "varCoerceReplace.dfMetadata", 
-		"varCoerceReplace.marray",
-		
-	"naOk.default", "naOk.varMetadata", "naOk.dfMetadata", "naOk.marray", 		
-	"naOkReplace", "naOkReplace.default", "naOkReplace.varMetadata", 
-		"naOkReplace.dfMetadata", "naOkReplace.marray",
- 		
-	"varDefault.default", "varDefault.varMetadata", "varDefault.dfMetadata", 
-		"varDefault.marray", 		
-	"varDefaultReplace", "varDefaultReplace.default", 
-		"varDefaultReplace.varMetadata", "varDefaultReplace.dfMetadata", 
-		"varDefaultReplace.marray",
-
-	"is.varMetadata", "as.varMetadata", "as.varMetadata.default",
-		"as.list.varMetadata", "as.character.varMetadata",
-		"print.varMetadata", "Replace3.varMetadata",
- 		
-	"is.dfMetadata", "as.dfMetadata", "as.dfMetadata.default",    	
-		"as.dfMetadata.list", "as.dfMetadata.data.frame",
-    	"as.dfMetadata.dfMetadata", "as.list.dfMetadata",
-		"print.dfMetadata", "customAttrNames.dfMetadata", 
-		"Extract2.dfMetadata", "Replace.dfMetadata",
-		"allowNewColumns", "allowNewColumnsReplace.dfMetadata",
-			
-	"as.data.frame.dfMetadata", "as.data.frame.marray",	
-	"is.marray", "as.marray", "as.marray.default",
-		"print.marray", "marrayReplace", "marrayReplace2",
-
-	".VM_RESERVED_NAMES", "checkType", "doVarCoercion", "xpdrows.marray",
-	"customAttrNames.marray"
+	"is.marray", 
+	"as.marray", "as.marray.default", "as.marray.marray",
+	"as.array.marray",
+	"print.marray", 
+	"dimdata.default", "dimdataReplace", "dimdataReplace.default", 
+ 	"rowdata", "rowdata.default", "rowdataReplace", "rowdataReplace.default",
+ 	"coldata", "coldata.default", "coldataReplace", "coldataReplace.default",
+	"cbind.marray"
 );
  
 unlink(file.path(devPath(), "man", paste(toRm, ".Rd", sep="")))

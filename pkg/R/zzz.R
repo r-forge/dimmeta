@@ -20,7 +20,7 @@
 #' }
 #'
 #' @title Arrays and Data Frames with Metadata
-#' @name marray-package
+#' @name metadata-package
 #' @docType package
 #' @author Enrique Bengoechea \email{enrique.bengoechea@@credit-suisse.com}
 #' @keywords package
@@ -29,5 +29,5 @@
 # @examples
 NULL
 
-# @import piUtils
-# NULL 
+#' @import ppTools
+NULL 

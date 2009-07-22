@@ -8,62 +8,36 @@
 # LICENSE:     GPL-2
 ################################################################################
 
-#' Extract or replace subsets of objects with metadata.
+#' Extract subsets of arrays with metadata.
 #' 
-#' These methods behave as their \code{data.frame}  
-#' \link[base:Extract.data.frame]{counterparts}, with the following 
-#' differences:
-#' \itemize{
-#' 	\item for extraction, whenever possible, the \code{marray} class 
-#'  	(or subclass) and its associated metadata are preserved, subsetting
-#' 		also the metadata as necessary. If some component of the key is 
-#' 		dropped, the whole key is removed from the metadata.
-#' 		Subsets extracted with \code{[[} and \code{$}, or with \code{[} if 
-#' 		some dimension is dropped, always lose the metadata. 	 
-#' 	\item for replacement, the metadata constraints are enforced: 
-#' 	\enumerate{
-#' 		\item data is coerced to the target column class automatically
-#' 		\item \code{NA}s in columns with \code{na.ok = FALSE} raise an
-#' 			error. Beware that non-intended \code{NA}s may appear in the
-#' 			automatic coercion process.   			
-#' 		\item new data is filled with the default value when a specific
-#' 			value is not given.
-#' 		\item duplicated key values in several rows raise an error.
-#' 	}
-#' }
+#' This method behaves as its \code{array} \link[base:Extract]{counterpart}, 
+#' with the additional feature that the \code{dimdata} attribute, when
+#' present, is subsetted along with each of the corresponding dimension
+#' subscript.
 #' 
-#' @title Extract or Replace Parts of a Specialized Data Frame
+#' @title Extract Parts of Arrays with Metadata
 #' @name Extract.marray
-#' @aliases [.marray [<-.marray [[.marray [[<-.marray
+# @aliases [.marray 
 #' @usage 
-#' 	\method{[}{marray}(x, ..., drop)
-#'  \method{[}{marray}(x, ...) <- value
-#' 	\method{[[}{marray}(x, ...) <- value
+#' 	\method{[}{marray}(x, ..., drop = TRUE)
 #'  
 #' @param x an \code{\link{marray}}.
-#' @param {i,j} elements to extract or replace. For \code{[} and \code{[[}, 
-#' 	these are \code{numeric} or \code{character} or, for \code{[} only, 
-#'  \code{logical} or \code{empty}. Numeric values are coerced to 
-#'  \code{integer}. 
+#' @param \dots indexes for elements to extract: these can
+#' 	be either non-specified, or \code{numeric}, \code{logical}, or 
+#'  \code{character} vectors, as for standard arrays. 
 #  For replacement by [, a logical matrix is allowed. For replacement by $, 
 #  i is a name or literal character string.
 #' @param drop logical. If \code{TRUE} the result is coerced to the lowest 
-#'  possible dimension. The default is to drop if only one column is left, 
-#'  but not to drop if only one row is left. If some dimension is dropped,
-#'  class \code{marray} and the related metadata are always dropped.
+#'  possible dimension, as for standard arrays.   
+#'  If the dimensions are actually dropped, attribute \code{dimdata} is lost,
+#'  losing all the metadata. 
 #' @param value a suitable replacement value: it will be repeated a whole 
-#'  number of times if necessary and it may be coerced to the column
-#'  class in the metadata specification. If \code{NULL}, deletes the column 
-#'  if a single column is selected. 
+#'  number of times if necessary.	 
 #' 
-#' @return For \code{[} a marray, data frame, list or a single column 
-#'  (the latter two only when dimensions have been dropped). 
-#' @seealso \link[base:Extract.data.frame]{Extract} for data frames.
-#' @S3method `[` marray
-
+#' @seealso \link[base:Extract]{[ extraction} for arrays.
 #' @S3method `[` marray
 #  NOTE: The replacement method is not needed: indexes outside bounds 
-# 		raise an error with arrays
+# 		 raise an error with arrays.
 
 `[.marray` <- function(x, ..., drop = TRUE) {
 	dimData <- dimdata(x);
@@ -96,7 +70,36 @@
 	x;		
 }
 
-
+#' Methods for combining \code{marray}s with other objects by rows or columns. 
+#' 
+#' These methods behave as \code{rbind} and \code{cbind}, with the
+#' additional feature that attribute \code{dimdata} (with metadata along
+#' the dimensions) is kept whenever possible. When the combined objects
+#' are not \code{marray}s, each dimension metadata is filled with either
+#' \code{NA}s (for atomic vectors) or \code{NULL}s (for lists). 
+#' 
+#' @title Combine marrays by Rows or Columns
+#' @aliases cbind.marray
+#' @usage
+#'  \method{rbind}{marray}(..., deparse.level = 1)
+#'  \method{cbind}{marray}(..., deparse.level = 1)
+#' 
+#' @param \dots
+#' @param deparse.level
+#' 
+#' @return An \code{marray} with 2 dimensions (an "mmatrix") combining the 
+#' 	\dots arguments column-wise or row-wise.
+#'  
+#'  For \code{cbind} row data is taken from the first argument with 
+#'  appropriate "rowdata" on its \code{dimdata} attribute. Column data
+#'  is built combining each argument's "coldata", filled with \code{NA}s or
+#'  \code{NULL}s for arguments that lack a \code{dimdata} attribute.
+#' 
+#'  For \code{rbind} column data is taken from the first argument with 
+#'  appropriate "coldata" on its \code{dimdata} attribute. Row data
+#'  is built combining each argument's "rowdata", filled with \code{NA}s or
+#'  \code{NULL}s for arguments that lack a \code{dimdata} attribute.
+#' 
 #' @S3method rbind marray
 
 rbind.marray <- function(..., deparse.level=1) {
