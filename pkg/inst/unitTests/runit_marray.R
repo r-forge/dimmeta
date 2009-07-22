@@ -134,6 +134,39 @@ test_extract_dimdata <- svTest(function() {
 		list(D1=data.frame(r1=-1:-2, r2=factor(c("eur", "usd"))), 
 			D2=list(c1=1, c2=5:3, c3=list("wow!", "ja!"))),		
 		dimdata(x, use.dimnames=TRUE));
+	checkEquals(data.frame(-1:-2, factor(c("eur", "usd"))), rowdata(x));
+	checkEquals(data.frame(r1=-1:-2, r2=factor(c("eur", "usd"))), 
+		rowdata(x, use.rownames=TRUE));	
+	checkEquals(list(X=1, Y=5:3, Z=list("wow!", "ja!")), coldata(x));
+	checkEquals(list(c1=1, c2=5:3, c3=list("wow!", "ja!")), 
+		coldata(x, use.colnames=TRUE));
+	
+	# When some dimension data is NULL...
+	x <- marray(1:6, dim=c(2, 3), 
+		dimnames=list(c("r1", "r2"), c("c1", "c2", "c3")), 
+		dimdata=list(letters[1:2], NULL));
+	checkEquals(list(c("a", "b"), NULL), dimdata(x));
+	checkEquals(list(setNames(c("a", "b"), c("r1", "r2")), NULL), 
+		dimdata(x, use.dimnames=TRUE));
+	checkEquals(c("a", "b"), rowdata(x));
+	checkEquals(setNames(c("a", "b"), c("r1", "r2")), 
+			rowdata(x, use.rownames=TRUE));
+	checkEquals(NULL, coldata(x));
+	checkEquals(NULL, coldata(x, use.colnames=TRUE));
+		
+	dimdata(x) <- list(NULL, NULL);
+	checkEquals(list(NULL, NULL), dimdata(x, use.dimnames=TRUE));
+	checkEquals(NULL, rowdata(x, use.rownames=TRUE));
+	checkEquals(NULL, rowdata(x, use.rownames=FALSE));
+	checkEquals(NULL, coldata(x, use.colnames=FALSE));
+	checkEquals(NULL, coldata(x, use.colnames=TRUE));
+	
+	dimdata(x) <- NULL;
+	checkEquals(NULL, dimdata(x, use.dimnames=TRUE));
+	checkEquals(NULL, rowdata(x, use.rownames=TRUE));
+	checkEquals(NULL, rowdata(x, use.rownames=FALSE));
+	checkEquals(NULL, coldata(x, use.colnames=FALSE));
+	checkEquals(NULL, coldata(x, use.colnames=TRUE));	
 })
 
 test_replace_dimdata <- svTest(function() {
