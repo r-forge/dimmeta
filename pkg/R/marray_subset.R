@@ -264,3 +264,10 @@ indexLenSelection <- function(x, len) {
 		else
 			length(seq_len(len)[x])
 }
+
+#' @name dimReplace.marray
+#' @nord
+#' @S3method `dim<-` marray
+
+`dim<-.marray` <- function(x, value) 
+    stop("modifying dimensions is not supported for marrays: coerce to array first");

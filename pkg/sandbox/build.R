@@ -32,6 +32,7 @@ toRm <- c(
  	"rowmeta", "rowmeta.default", "rowmetaReplace", "rowmetaReplace.default",
  	"colmeta", "colmeta.default", "colmetaReplace", "colmetaReplace.default",
 	"cbind.marray",
+	"dimReplace.marray",
 	"indexLenSelection"
 );
  
