@@ -111,6 +111,39 @@
 #'  "Annotations" on the \pkg{Biobase} package have a similar meaning to
 #'  "metadata" as used here. See class 
 #'  \code{\link[Biobase]{AnnotatedDataFrame}}.
+#' @examples 
+#' x <- marray(1:30, dim = c(2, 3, 5))
+#' dimnames(x) <- list(c("a", "b"), c("a1", "a2", "a3"), NULL) 
+#' dimmeta(x) <- list(1:2, list(x = 1:5, y = letters[1:8], z = NA), 
+#' 		letters[1:5])
+#'
+#' ## Dimension metadata accessors
+#' dimmeta(x)
+#' dimmeta(x, use.dimnames = TRUE)
+#' rowmeta(x)
+#' colmeta(x)
+#' 
+#' ## Subsetting 
+#' y <- x[,1:2,2:3]
+#' str(dimnames(y))
+#' str(dimmeta(y))
+#' 
+#' ## Combining by rows or columns 
+#' ## (doesn't work with data frames yet)
+#' y <- x[,,1]
+#' z <- cbind(y, 1, y)
+#' str(dimmeta(z))
+#' 
+#' z <- rbind(y, 1, y)
+#' str(dimmeta(z))
+#' 
+#' ## Using data frames for metadata
+#' x <- marray(1:6, dim = c(2, 3))
+#' dimmeta(x) <- list(NULL, data.frame(labels=I(c("col1", "col2", "col3")),
+#'     units=c("m", "cm", "bar"))) 
+#' colmeta(x)$labels
+#' colmeta(x)$units
+#' 
 #' @export
 
 marray <- function (data = NA, dim = length(data), dimnames = NULL,
