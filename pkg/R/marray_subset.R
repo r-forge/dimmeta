@@ -41,8 +41,7 @@
 
 `[.marray` <- function(x, ..., drop = TRUE) {
 	dimData <- dimdata(x);
-	y <- x;	# FIXME: This copy is used when indexing by character, due to
-			# 	the current arguments of valIndex.character 	
+	dimNames <- dimnames(x);
 	x <- NextMethod();
 	
 	if (length(dimData) && length(dim(x))) {
@@ -57,10 +56,9 @@
 		for (i in seq_along(indexes)) {
     		index <- indexes[[i]];
 			if (is.character(index))
-				index <- valIndex(index, y, dim=i, retclass="integer")			
-			if (dimAttrLens[[i]] && !identical(TRUE, index)) {
-				dimData[[i]] <- dimData[[i]][index];
-			}
+				index <- match(index, dimNames[[i]], nomatch=0L)
+			if (dimAttrLens[[i]] && !identical(TRUE, index)) 
+				dimData[[i]] <- dimData[[i]][index]
 		}
 
 		attr(x, "dimdata") <- dimData;

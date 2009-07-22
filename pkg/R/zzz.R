@@ -28,6 +28,3 @@
 #'  and packages \pkg{Biobase} and \pkg{xts}.
 # @examples
 NULL
-
-#' @import ppTools
-NULL 
