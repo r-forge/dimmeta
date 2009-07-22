@@ -28,10 +28,11 @@ toRm <- c(
 	"as.marray", "as.marray.default", "as.marray.marray",
 	"as.array.marray",
 	"print.marray", 
-	"dimdata.default", "dimdataReplace", "dimdataReplace.default", 
- 	"rowdata", "rowdata.default", "rowdataReplace", "rowdataReplace.default",
- 	"coldata", "coldata.default", "coldataReplace", "coldataReplace.default",
-	"cbind.marray"
+	"dimmeta.default", "dimmetaReplace", "dimmetaReplace.default", 
+ 	"rowmeta", "rowmeta.default", "rowmetaReplace", "rowmetaReplace.default",
+ 	"colmeta", "colmeta.default", "colmetaReplace", "colmetaReplace.default",
+	"cbind.marray",
+	"indexLenSelection"
 );
  
 unlink(file.path(devPath(), "man", paste(toRm, ".Rd", sep="")))

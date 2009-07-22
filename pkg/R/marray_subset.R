@@ -11,9 +11,9 @@
 #' Extract subsets of arrays with metadata.
 #' 
 #' This method behaves as its \code{array} \link[base:Extract]{counterpart}, 
-#' with the additional feature that the \code{dimdata} attribute, when
+#' with the additional feature that the \code{dimmeta} attribute, when
 #' present, is subsetted along with each of the corresponding dimension
-#' subscript.
+#' subscripts.
 #' 
 #' @title Extract Parts of Arrays with Metadata
 #' @name Extract.marray
@@ -25,12 +25,10 @@
 #' @param \dots indexes for elements to extract: these can
 #' 	be either non-specified, or \code{numeric}, \code{logical}, or 
 #'  \code{character} vectors, as for standard arrays. 
-#  For replacement by [, a logical matrix is allowed. For replacement by $, 
-#  i is a name or literal character string.
 #' @param drop logical. If \code{TRUE} the result is coerced to the lowest 
 #'  possible dimension, as for standard arrays.   
-#'  If the dimensions are actually dropped, attribute \code{dimdata} is lost,
-#'  losing all the metadata. 
+#'  If the dimensions are actually dropped, attribute \code{dimmeta} is also
+#' 	dropped, losing all the metadata. 
 #' @param value a suitable replacement value: it will be repeated a whole 
 #'  number of times if necessary.	 
 #' 
@@ -40,15 +38,15 @@
 # 		 raise an error with arrays.
 
 `[.marray` <- function(x, ..., drop = TRUE) {
-	dimData <- dimdata(x);
+	dimData <- dimmeta(x);
 	dimNames <- dimnames(x);
 	origXDim <- dim(x); 
 	
 	x <- NextMethod();
 	nDimX <- length(dim(x)); 
 	
-	# If there's dimdata and the result has not been dropped to
-    # a vector, we need to also subset the dimdata.
+	# If there's dimmeta and the result has not been dropped to
+    # a vector, we need to also subset the dimmeta.
 	if (length(dimData) && nDimX) {
 		# Detect missing index arguments and replace by TRUE 		
 		indexes <- lapply(substitute(alist(...))[-1L],  
@@ -58,7 +56,7 @@
 					else eval(y)
 			);
 			
-		# If some dimension has been dropped, remove its corresponding dimdata
+		# If some dimension has been dropped, remove its corresponding dimmeta
 		if (length(origXDim) > nDimX) 			
 			for (i in seq.int(length(origXDim), 1, by=-1))
 				if (indexLenSelection(indexes[[i]], origXDim[[i]]) == 1L) {
@@ -67,7 +65,7 @@
 					dimNames <- dimNames[-i];
 				}
 		
-		# Subset the dimdata
+		# Subset the dimmeta
 		dimAttrLens <- sapply(dimData, length, USE.NAMES=FALSE);
 		for (i in seq_along(indexes)) {
     		index <- indexes[[i]];
@@ -77,7 +75,7 @@
 				dimData[[i]] <- dimData[[i]][index]
 		}
 
-		attr(x, "dimdata") <- dimData;
+		attr(x, "dimmeta") <- dimData;
 		class(x) <- "marray";
 	}	
 			
@@ -87,7 +85,7 @@
 #' Methods for combining \code{marray}s with other objects by rows or columns. 
 #' 
 #' These methods behave as \code{rbind} and \code{cbind}, with the
-#' additional feature that attribute \code{dimdata} (with metadata along
+#' additional feature that attribute \code{dimmeta} (with metadata along
 #' the dimensions) is kept whenever possible. When the combined objects
 #' are not \code{marray}s, each dimension metadata is filled with either
 #' \code{NA}s (for atomic vectors) or \code{NULL}s (for lists). 
@@ -105,14 +103,14 @@
 #' 	\dots arguments column-wise or row-wise.
 #'  
 #'  For \code{cbind} row data is taken from the first argument with 
-#'  appropriate "rowdata" on its \code{dimdata} attribute. Column data
-#'  is built combining each argument's "coldata", filled with \code{NA}s or
-#'  \code{NULL}s for arguments that lack a \code{dimdata} attribute.
+#'  appropriate "rowmeta" on its \code{dimmeta} attribute. Column data
+#'  is built combining each argument's "colmeta", filled with \code{NA}s or
+#'  \code{NULL}s for arguments that lack a \code{dimmeta} attribute.
 #' 
 #'  For \code{rbind} column data is taken from the first argument with 
-#'  appropriate "coldata" on its \code{dimdata} attribute. Row data
-#'  is built combining each argument's "rowdata", filled with \code{NA}s or
-#'  \code{NULL}s for arguments that lack a \code{dimdata} attribute.
+#'  appropriate "colmeta" on its \code{dimmeta} attribute. Row data
+#'  is built combining each argument's "rowmeta", filled with \code{NA}s or
+#'  \code{NULL}s for arguments that lack a \code{dimmeta} attribute.
 #' 
 #' @S3method rbind marray
 
@@ -124,10 +122,10 @@ rbind.marray <- function(..., deparse.level=1) {
 	isList <- FALSE;
 	allNull <- TRUE;	
     if (length(dots)) {
-		rowData <- lapply(dots, function(x) {
+		rowMeta <- lapply(dots, function(x) {
 				if (is.matrix(x)) {
 					if (is.marray(x)) {
-						result <- dimdata(x)[[1L]];
+						result <- dimmeta(x)[[1L]];
 						if (is.list(result))
 							isList <<- TRUE;
 						if (!is.null(result))
@@ -140,12 +138,12 @@ rbind.marray <- function(..., deparse.level=1) {
 				} else NULL;
 			});
 		
-		colData <- NULL;
+		colMeta <- NULL;
 		i <- 1; 
-		while (is.null(colData) && i <= length(dots)) {
+		while (is.null(colMeta) && i <= length(dots)) {
 			x <- dots[[i]];
-			if (is.matrix(x) && is.marray(x) && !is.null(dimdata(x)[[2L]]))
-				colData <- dimdata(x)[[2L]];
+			if (is.matrix(x) && is.marray(x) && !is.null(dimmeta(x)[[2L]]))
+				colMeta <- dimmeta(x)[[2L]];
     		i <- i + 1;
 		} 
 	}
@@ -154,17 +152,17 @@ rbind.marray <- function(..., deparse.level=1) {
 		c(lapply(dots, as.array), list(deparse.level=deparse.level)));
 	
 	if (length(dots) && is.matrix(x) && !allNull) {
-		rowData <- if (isList) 
-			do.call("c", rowData)				
+		rowMeta <- if (isList) 
+			do.call("c", rowMeta)				
 		else 
-			unlist(lapply(rowData, function(x) {
+			unlist(lapply(rowMeta, function(x) {
 					if (is.null(x)) 
 						NA
 					else if (is.list(x) && all(sapply(x, is.null)))
 						rep(NA, length(x))
 					else x
 				}));
-		x <- as.marray(x, dimdata=list(rowData, colData));		
+		x <- as.marray(x, dimmeta=list(rowMeta, colMeta));		
 	}
 	
 	x;
@@ -181,10 +179,10 @@ cbind.marray <- function(..., deparse.level=1) {
 	isList <- FALSE;
 	allNull <- TRUE;	
     if (length(dots)) {
-		colData <- lapply(dots, function(x) {
+		colMeta <- lapply(dots, function(x) {
 				if (is.matrix(x)) {
 					if (is.marray(x)) {
-						result <- dimdata(x)[[2L]];
+						result <- dimmeta(x)[[2L]];
 						if (is.list(result))
 							isList <<- TRUE;
 						if (!is.null(result))
@@ -197,12 +195,12 @@ cbind.marray <- function(..., deparse.level=1) {
 				} else NULL;
 			});
 		
-		rowData <- NULL;
+		rowMeta <- NULL;
 		i <- 1; 
-		while (is.null(rowData) && i <= length(dots)) {
+		while (is.null(rowMeta) && i <= length(dots)) {
 			x <- dots[[i]];
-			if (is.matrix(x) && is.marray(x) && !is.null(dimdata(x)[[1L]])) {
-				rowData <- dimdata(x)[[1L]];
+			if (is.matrix(x) && is.marray(x) && !is.null(dimmeta(x)[[1L]])) {
+				rowMeta <- dimmeta(x)[[1L]];
 				allNull <- FALSE;
 			}
     		i <- i + 1;
@@ -213,25 +211,41 @@ cbind.marray <- function(..., deparse.level=1) {
 		c(lapply(dots, as.array), list(deparse.level=deparse.level)));
 
 	if (length(dots) && is.matrix(x) && !allNull) {
-		colData <- if (isList) 
-			do.call("c", colData)				
+		colMeta <- if (isList) 
+			do.call("c", colMeta)				
 		else 
-			unlist(lapply(colData, function(x) {
+			unlist(lapply(colMeta, function(x) {
 					if (is.null(x)) 
 						NA
 					else if (is.list(x) && all(sapply(x, is.null)))
 						rep(NA, length(x))
 					else x
 				}));
-		x <- as.marray(x, dimdata=list(rowData, colData));		
+		x <- as.marray(x, dimmeta=list(rowMeta, colMeta));		
 	}
 		
 	x;
 }
 
-# This function relies on the fact that the index has been previously
-# validated by the primitive indexing, otherwise we would need much more 
-# checking!
+#' Returns the length of the items selected by index \code{x} when used
+#' to subscript an object whole length or dimension length being subscripted
+#' is given by \code{len}.
+#'
+#' @title Number of Elements Selected by an Index
+#' @param x a numeric, logical, or character vector used as subscript 
+#' 	to index an object.
+#' @param len integer with the length of the object to be indexed, or the
+#' 	length of the dimension that is to be indexed.
+#' 
+#' @return An integer with the number of elements that would result
+#' 	from the selection.  
+#' @note This function is private, only to be invoked internally by 
+#' \code{[.marray}: it relies on the fact that the index has been previously
+#' validated by the primitive indexing, otherwise we would need much more 
+#' checks!
+#' 
+#' @nord  
+#  NOT EXPORTED 
 
 indexLenSelection <- function(x, len) {
 	if (is.character(x))

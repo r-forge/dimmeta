@@ -15,32 +15,32 @@ as.marray <- function(x, ...) UseMethod("as.marray");
 #' @nord
 #' @export
 
-dimdata <- function(x, ...) UseMethod("dimdata");
+dimmeta <- function(x, ...) UseMethod("dimmeta");
 
-#' @name dimdataReplace
+#' @name dimmetaReplace
 #' @nord
-#' @export `dimdata<-`
+#' @export `dimmeta<-`
 
-`dimdata<-` <- function(x, value) UseMethod("dimdata<-");
-
-#' @nord
-#' @export
-
-rowdata <- function(x, ...) UseMethod("rowdata");
-
-#' @name rowdataReplace
-#' @nord
-#' @export `rowdata<-`
-
-`rowdata<-` <- function(x, value) UseMethod("rowdata<-");
+`dimmeta<-` <- function(x, value) UseMethod("dimmeta<-");
 
 #' @nord
 #' @export
 
-coldata <- function(x, ...) UseMethod("coldata");
+rowmeta <- function(x, ...) UseMethod("rowmeta");
 
-#' @name coldataReplace
+#' @name rowmetaReplace
 #' @nord
-#' @export `coldata<-`
+#' @export `rowmeta<-`
 
-`coldata<-` <- function(x, value) UseMethod("coldata<-");
+`rowmeta<-` <- function(x, value) UseMethod("rowmeta<-");
+
+#' @nord
+#' @export
+
+colmeta <- function(x, ...) UseMethod("colmeta");
+
+#' @name colmetaReplace
+#' @nord
+#' @export `colmeta<-`
+
+`colmeta<-` <- function(x, value) UseMethod("colmeta<-");
