@@ -11,9 +11,10 @@ library(DevTools);
 useDevLib();
 devPath(file.path("C:", "ebe", "Work", "Projects", "PaRiS_R", "metadata"));
 
-library(ppTools)
+#library(ppTools)
 
 s("generics.R")
+s("methods_default.R")
 s("marray.R")
 s("marray_subset.R")
 

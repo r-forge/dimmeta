@@ -51,6 +51,14 @@ test_extract_2d_dropDim <- svTest(function() {
 	checkEquals(c(5, 6), x[,3]);	
 	checkEquals(c(1, 3, 5), x[1,]);
 	checkEquals(c(6, 2), x[2, c(3, 1)]);
+	
+	# Reduce the number of dimensions
+	x <- marray(1:8, dim=c(2, 2, 2), 
+		dimdata=list(letters[1:2], LETTERS[1:2], 1:2));
+ 
+	checkEquals(marray(5:8, dim=c(2, 2), 
+			dimdata=list(letters[1:2], LETTERS[1:2])),
+		x[,,2]);
 })
 
 test_extract_2d_keepDim <- svTest(function() {

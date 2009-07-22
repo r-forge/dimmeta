@@ -17,7 +17,7 @@
 #' 
 #' @title Extract Parts of Arrays with Metadata
 #' @name Extract.marray
-# @aliases [.marray 
+#' @aliases [.marray 
 #' @usage 
 #' 	\method{[}{marray}(x, ..., drop = TRUE)
 #'  
@@ -42,16 +42,32 @@
 `[.marray` <- function(x, ..., drop = TRUE) {
 	dimData <- dimdata(x);
 	dimNames <- dimnames(x);
-	x <- NextMethod();
+	origXDim <- dim(x); 
 	
-	if (length(dimData) && length(dim(x))) {
+	x <- NextMethod();
+	nDimX <- length(dim(x)); 
+	
+	# If there's dimdata and the result has not been dropped to
+    # a vector, we need to also subset the dimdata.
+	if (length(dimData) && nDimX) {
+		# Detect missing index arguments and replace by TRUE 		
 		indexes <- lapply(substitute(alist(...))[-1L],  
 				function(y) 
 					if (is.name(y) && identical("", as.character(y)))
 	    				TRUE
 					else eval(y)
-			);			
+			);
+			
+		# If some dimension has been dropped, remove its corresponding dimdata
+		if (length(origXDim) > nDimX) 			
+			for (i in seq.int(length(origXDim), 1, by=-1))
+				if (indexLenSelection(indexes[[i]], origXDim[[i]]) == 1L) {
+					dimData[[i]] <- NULL;
+					indexes[[i]] <- NULL;
+					dimNames <- dimNames[-i];
+				}
 		
+		# Subset the dimdata
 		dimAttrLens <- sapply(dimData, length, USE.NAMES=FALSE);
 		for (i in seq_along(indexes)) {
     		index <- indexes[[i]];
@@ -211,4 +227,20 @@ cbind.marray <- function(..., deparse.level=1) {
 	}
 		
 	x;
+}
+
+# This function relies on the fact that the index has been previously
+# validated by the primitive indexing, otherwise we would need much more 
+# checking!
+
+indexLenSelection <- function(x, len) {
+	if (is.character(x))
+		length(x)
+	else if (is.logical(x))
+		sum(rep(x, length.out=len))
+	else if (is.numeric(x))
+		if (all(x >= 0))
+			sum(as.integer(x) != 0L)
+		else
+			length(seq_len(len)[x])
 }
