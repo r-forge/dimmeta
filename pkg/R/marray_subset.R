@@ -38,7 +38,7 @@
 # 		 raise an error with arrays.
 
 `[.marray` <- function(x, ..., drop = TRUE) {
-	dimData <- dimmeta(x);
+	dimMeta <- dimmeta(x);
 	dimNames <- dimnames(x);
 	origXDim <- dim(x); 
 	
@@ -47,7 +47,7 @@
 	
 	# If there's dimmeta and the result has not been dropped to
     # a vector, we need to also subset the dimmeta.
-	if (length(dimData) && nDimX) {
+	if (length(dimMeta) && nDimX) {
 		# Detect missing index arguments and replace by TRUE 		
 		indexes <- lapply(substitute(alist(...))[-1L],  
 				function(y) 
@@ -56,26 +56,30 @@
 					else eval(y)
 			);
 			
-		# If some dimension has been dropped, remove its corresponding dimmeta
+		# If some dimension has been dropped, remove its metadata
 		if (length(origXDim) > nDimX) 			
 			for (i in seq.int(length(origXDim), 1, by=-1))
 				if (indexLenSelection(indexes[[i]], origXDim[[i]]) == 1L) {
-					dimData[[i]] <- NULL;
+					dimMeta[[i]] <- NULL;
 					indexes[[i]] <- NULL;
 					dimNames <- dimNames[-i];
 				}
 		
-		# Subset the dimmeta
-		dimAttrLens <- sapply(dimData, length, USE.NAMES=FALSE);
-		for (i in seq_along(indexes)) {
+		# Subset the dimmeta		
+		doSubset <- mapply(function(meta, index) 
+				length(meta) && !identical(TRUE, index),
+			meta=dimMeta, index=indexes, USE.NAMES=FALSE);
+		for (i in which(doSubset)) {
     		index <- indexes[[i]];
 			if (is.character(index))
 				index <- match(index, dimNames[[i]], nomatch=0L)
-			if (dimAttrLens[[i]] && !identical(TRUE, index)) 
-				dimData[[i]] <- dimData[[i]][index]
+			meta <- dimMeta[[i]];
+    		dimMeta[[i]] <- if (length(dim(meta))) 
+				meta[index,,drop=FALSE]
+			else meta[index]
 		}
 
-		attr(x, "dimmeta") <- dimData;
+		attr(x, "dimmeta") <- dimMeta;
 		class(x) <- "marray";
 	}	
 			

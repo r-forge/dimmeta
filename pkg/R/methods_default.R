@@ -33,7 +33,9 @@
 #' 
 #' @param x an \R object, normally an \code{\link{marray}}.
 #' @param use.dimnames logical flag; whether the returned data should
-#' 	have the same \code{dimnames} as \code{x}.
+#' 	have the same \code{dimnames} as \code{x}. Metadata stored as objects
+#'  with dimensions get the names of their \emph{first dimension} replaced,
+#'  while metadata without dimensions get their names replaced.
 #' @param use.rownames logical flag; whether the returned data should
 #' 	have the same \code{rownames} as \code{x}.
 #' @param use.colnames logical flag; whether the returned data should
@@ -55,11 +57,16 @@ dimmeta.default <- function(x, use.dimnames=FALSE) {
 	if (use.dimnames) { 
 		xDimnames <- dimnames(x);
 		result <- if (is.null(xDimnames))
-			lapply(result, `names<-`, value=NULL)
+			lapply(result, function(x)
+    				if (length(dim(x)))
+						dimnames(x) <- NULL
+					else names(x) <- NULL)
 		else {
 			isNotNull <- !sapply(result, is.null, USE.NAMES=FALSE)
 			for (i in which(isNotNull))
-				names(result[[i]]) <- xDimnames[[i]];
+				if (length(dim(result[[i]])))
+					dimnames(result[[i]])[[1L]] <- xDimnames[[i]]
+				else names(result[[i]]) <- xDimnames[[i]];
 			result;
 		}
 		names(result) <- names(xDimnames);
@@ -81,12 +88,17 @@ dimmeta.default <- function(x, use.dimnames=FALSE) {
 			stop(gettextf("'%s' must be a list", "dimmeta"));
     	
 		if (length(value) > length(xDim))
-			stop(gettextf("length of '%s' [%d] must match that of 's' [%d]",
+			stop(gettextf("length of '%s' [%d] must match that of '%s' [%d]",
 				"dimmeta", length(value), "dims", length(xDim)));
 		
-		for (i in seq_along(value)) {
+		for (i in which(!sapply(value, is.null))) {
 			v <- value[[i]];
-			if (!is.null(v) && length(v) != xDim[i])
+			if (length(dim(v))) {
+    			if (dim(v)[[1L]] != xDim[i])
+					stop(gettextf(
+						"dim('%s')[[1]] [%d] not equal to array extent",
+						"dimmeta", i))						
+			} else if (length(v) != xDim[i])
 				stop(gettextf("length of '%s' [%d] not equal to array extent",
 					"dimmeta", i));	
 		}

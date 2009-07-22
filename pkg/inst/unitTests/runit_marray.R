@@ -65,32 +65,31 @@ test_extract_2d_keepDim <- svTest(function() {
 	xda <- list(letters[1:2], LETTERS[1:3]);
 	x <- marray(1:6, dim=c(2, 3), dimmeta=xda);
 	
-	# No indexes return the object unchanged
-	checkEquals(x, x[]);
+	checkEquals(x, x[], "no index returns the marray unchanged");
     	
-	# With drop=FALSE and 2 indexes, keep dimmeta		
 	checkEquals(marray(6, dim=c(1, 1), dimmeta=list("b", "C")), 
-		x[c(FALSE, TRUE), c(FALSE, FALSE, TRUE), drop=FALSE]);
+		x[c(FALSE, TRUE), c(FALSE, FALSE, TRUE), drop=FALSE],
+		"With drop=FALSE and 2 indexes, keep dimmeta");
 	
-	# With drop=FALSE and one index missing, keep dimmeta		
 	checkEquals(marray(c(2, 1, 4, 3, 6, 5), dim=c(2, 3), 
 			dimmeta=list(c("b", "a"), c("A", "B", "C"))), 
-		x[2:1,]);	
+		x[2:1,],
+		"With drop=FALSE and one index missing, keep dimmeta");	
 		
-	# Select an array with one column less, resorting rows and columns	
 	checkEquals(marray(c(6, 5, 2, 1), dim=c(2, 2), 
 			dimmeta=list(c("b", "a"), c("C", "A"))), 
-		x[2:1, c(3, 1)]);
+		x[2:1, c(3, 1)],
+		"select an array with one column less, resorting rows and columns");
 	
-	# Extract using names
 	dimnames(x) <- list(paste("r", 1:2, sep=""), paste("c", 1:3, sep="")); 
 	checkEquals(marray(c(4, 3, 2, 1), dim=c(2, 2),
     		dimnames=list(c("r2", "r1"), c("c2", "c1")),
 			dimmeta=list(c("b", "a"), c("B", "A"))), 
-		x[c("r2", "r1"), c("c2", "c1")]);
+		x[c("r2", "r1"), c("c2", "c1")],
+		"extract using names (character vector subscript)");
 	
-	# Extract using matrix: always drops dimensions, coercing to vector 
-	checkEquals(c(6, 6, 3), x[matrix(c(2, 2, 1, 3, 3, 2), 3, 2)]);
+	checkEquals(c(6, 6, 3), x[matrix(c(2, 2, 1, 3, 3, 2), 3, 2)],
+		"extract using matrix always drops dimensions, coercing to vector");
 })
 
 test_extract_2d_indexEdgeCases <- svTest(function() {
@@ -118,32 +117,42 @@ test_extract_2d_indexEdgeCases <- svTest(function() {
 		x[NA, ]);	
 })
 
-test_extract_2d_dimmetaNonVector <- svTest(function() {
-	xda <- list(data.frame(X1=-1:-2, X2=factor(c("eur", "usd"))), 
+test_extract_2d_dfDimmeta <- svTest(function() {
+	xda <- list(data.frame(X1=c(-1, -2), X2=factor(c("eur", "usd"))), 
 		list(X=1, Y=5:3, Z=list("wow!", "ja!")));
 	x <- marray(1:6, dim=c(2, 3), dimmeta=xda);
 	
 	checkEquals(marray(c(6, 5), dim=c(2, 1), 
 			dimmeta=list(
-				data.frame(X2=factor(c("eur", "usd")), X1=-1:-2), 
+				data.frame(X1=c(-1, -2), X2=factor(c("eur", "usd")))[
+					c(2,1),,drop=FALSE], 
 				list(Z=list("wow!", "ja!"))
 			)),		
-		x[2:1, 3, drop=FALSE]) 	
+		x[2:1, 3, drop=FALSE],
+		"use data frame and list with each item a different lengths as dimmeta");
+ 	
+	checkException(marray(1:6, dim=c(2, 3), dimmeta=list(
+			data.frame(X1=-1:-3, X2=factor(c("eur", "usd", "eur"))), 
+			list(X=1, Y=5:3, Z=list("wow!", "ja!"))
+		)), 
+		"number of rows of data frame does not equal number of columns in array");
 })
 
 test_extract_dimmeta <- svTest(function() {
-	xda <- list(data.frame(-1:-2, factor(c("eur", "usd"))), 
+	xda <- list(data.frame(A1=-1:-2, A2=factor(c("eur", "usd"))), 
 		list(X=1, Y=5:3, Z=list("wow!", "ja!")));
 	x <- marray(1:6, dim=c(2, 3), dimmeta=xda,
 		dimnames=list(D1=paste("r", 1:2, sep=""), D2=paste("c", 1:3, sep="")));
 	
 	checkEquals(xda, dimmeta(x));
  	checkEquals(
-		list(D1=data.frame(r1=-1:-2, r2=factor(c("eur", "usd"))), 
+		list(D1=data.frame(A1=-1:-2, A2=factor(c("eur", "usd")), 
+				row.names=c("r1", "r2")), 
 			D2=list(c1=1, c2=5:3, c3=list("wow!", "ja!"))),		
 		dimmeta(x, use.dimnames=TRUE));
-	checkEquals(data.frame(-1:-2, factor(c("eur", "usd"))), rowmeta(x));
-	checkEquals(data.frame(r1=-1:-2, r2=factor(c("eur", "usd"))), 
+	checkEquals(data.frame(A1=-1:-2, A2=factor(c("eur", "usd"))), rowmeta(x));
+	checkEquals(data.frame(A1=-1:-2, A2=factor(c("eur", "usd")), 
+			row.names=c("r1", "r2")), 
 		rowmeta(x, use.rownames=TRUE));	
 	checkEquals(list(X=1, Y=5:3, Z=list("wow!", "ja!")), colmeta(x));
 	checkEquals(list(c1=1, c2=5:3, c3=list("wow!", "ja!")), 
