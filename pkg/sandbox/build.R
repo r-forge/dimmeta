@@ -1,5 +1,5 @@
 ################################################################################
-# R PACKAGE:   metadata
+# R PACKAGE:   dimmeta
 # FILE:        R/build.R
 # DESCRIPTION: Utility script & instructions to build the R package
 #              for submission to CRAN
@@ -10,7 +10,7 @@
 
 # 0) Check all unit tests pass on a fresh install:
 library(DevTools);
-devPath(file.path("C:", "ebe", "Work", "Projects", "PaRiS_R", "metadata"));
+devPath(file.path("C:", "ebe", "Work", "Projects", "PaRiS_R", "dimmeta"));
 ut()
 
 # 1) Clear documentation produced in previous runs 
@@ -24,15 +24,16 @@ roxygen()
 #    of objects that are documented together with other objects):
 
 toRm <- c(
-	"is.marray", 
-	"as.marray", "as.marray.default", "as.marray.marray",
-	"as.array.marray",
-	"print.marray", 
+	"is.darray", 
+	"as.darray", "as.darray.default", "as.darray.darray",
+	"as.array.darray",
+	"print.darray", 
 	"dimmeta.default", "dimmetaReplace", "dimmetaReplace.default", 
  	"rowmeta", "rowmeta.default", "rowmetaReplace", "rowmetaReplace.default",
  	"colmeta", "colmeta.default", "colmetaReplace", "colmetaReplace.default",
-	"cbind.marray",
-	"dimReplace.marray",
+	"unmeta", "unmeta.default",
+	"cbind.darray",
+	"dimReplace.darray",
 	"indexLenSelection"
 );
  

@@ -1,9 +1,10 @@
-Package: metadata
+Package: dimmeta
 Type: Package
-Title: Arrays and Data Frames with Metadata
+Title: Arrays and Data Frames with Metadata along Dimensions
 Version: 0.0-1
 Date: 2009-07-10
 Author: Enrique Bengoechea <enrique.bengoechea@credit-suisse.com>,
+	Laurent Gautier <lgautier@gmail.com>
 Maintainer: Enrique Bengoechea <enrique.bengoechea@credit-suisse.com>
 Description: Provides infrastructure to attach metadata attributes to
     arrays and data frames that evolve "along each dimension" and are
@@ -12,5 +13,5 @@ Depends: R (>= 2.8.1)
 Suggests: svUnit
 License: GPL-2
 LazyLoad: yes
-Collate: 'generics.R' 'marray.R' 'marray_subset.R' 'methods_default.R'
+Collate: 'generics.R' 'darray.R' 'darray_subset.R' 'methods_default.R'
     'zzz.R'

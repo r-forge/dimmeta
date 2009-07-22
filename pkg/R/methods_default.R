@@ -1,5 +1,5 @@
 ################################################################################
-# R PACKAGE:   metadata
+# R PACKAGE:   dimmeta
 # FILE:        R/default_methods.R
 # DESCRIPTION: Default methods for some generics. 
 # AUTHOR:      Enrique Bengoechea <enrique.bengoechea@credit-suisse.com>
@@ -7,11 +7,12 @@
 # LICENSE:     GPL-2
 ################################################################################
 
-#' @title Get or Set Metadata along Array Dimensions
+#' @title Get, Set, or Drop Metadata along Array Dimensions
 #' @name dimmeta
 #' @aliases dimmeta dimmeta.default `dimmeta<-.default` 
 #' 	rowmeta rowmeta.default `rowmeta<-` `rowmeta<-.default`
 #' 	colmeta colmeta.default `colmeta<-` `colmeta<-.default`
+#'  unmeta
 #' @usage 
 #'  dimmeta(x, ...)
 #'  \method{dimmeta}{default}(x, use.dimnames = FALSE)
@@ -31,7 +32,10 @@
 #'  colmeta(x, ...) <- value 
 #'  \method{colmeta}{default}(x, use.colnames = FALSE) <- value
 #' 
-#' @param x an \R object, normally an \code{\link{marray}}.
+#'  unmeta(x, ...)
+#'  \method{unmeta}{default}(x)
+#' 
+#' @param x an \R object, normally an \code{\link{darray}}.
 #' @param use.dimnames logical flag; whether the returned data should
 #' 	have the same \code{dimnames} as \code{x}. Metadata stored as objects
 #'  with dimensions get the names of their \emph{first dimension} replaced,
@@ -136,5 +140,14 @@ colmeta.default <- function(x, use.colnames=FALSE)
 
 `colmeta<-.default` <- function(x, value) {
     dimmeta(x)[[2L]] <- value;
+	x;
+}
+
+#' @nord
+#' @S3method unmeta default
+
+unmeta.default <- function(x) {
+	if (!is.null(attr(x, "dimmeta")))
+		attr(x, "dimmeta") <- NULL;
 	x;
 }

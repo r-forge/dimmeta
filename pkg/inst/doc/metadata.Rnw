@@ -1,7 +1,7 @@
-% \VignetteIndexEntry{marray Manual}
-% \VignetteDepends{marray}
+% \VignetteIndexEntry{dimmeta Manual}
+% \VignetteDepends{dimmeta}
 % \VignetteKeywords{Sweave}
-% \VignettePackage{marray}
+% \VignettePackage{dimmeta}
  
 \documentclass[a4paper,12pt]{article}
 \usepackage[OT1]{fontenc}
@@ -16,17 +16,24 @@
 \newcommand{\Rfun}[1]{{\texttt{#1}}}
 \newcommand{\code}[1]{{\texttt{#1}}}
 
-\title{Arrays with Metadata}
+\title{Arrays and Data Frames with Metadata along Dimensions}
 \author{Enrique Bengoechea 
-\url{enrique.bengoechea@credit-suisse.com}}
+\url{enrique.bengoechea@credit-suisse.com}
+\and
+Laurent Gautier 
+\url{lgautier@gmail.com}
+}
 	
 \begin{document}
 
 \maketitle
 
 \begin{abstract}
-	Package \Rpkg{marray} provides infrastructure for adding to \R
-	arrays metadata that varies along the array dimensions.	
+	Package \Rpkg{darray} provides infrastructure for adding 
+	dimension-sensitive metadata to \R arrays and data frames.
+	Metadata behaves mostly similar to the standard "dimnames"
+	attribute, while all other behaviour of standard arrays
+	and data frames is preserved.
 \end{abstract}
 
 %\tableofcontents
@@ -38,6 +45,6 @@
  
 %\section{References}
 %\bibliographystyle{plain}
-%\bibliography{marray}
+%\bibliography{darray}
 
 

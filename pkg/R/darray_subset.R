@@ -1,8 +1,8 @@
 ################################################################################
-# R PACKAGE:   metadata
-# FILE:        R/marray_subset.R
+# R PACKAGE:   dimmeta
+# FILE:        R/darray_subset.R
 # DESCRIPTION: Methods related to extraction and replacement of 
-#			   parts of 'marray' objects.  
+#			   parts of 'darray' objects.  
 # AUTHOR:      Enrique Bengoechea <enrique.bengoechea@credit-suisse.com>
 # CREATED ON:  2009 July 7
 # LICENSE:     GPL-2
@@ -16,12 +16,12 @@
 #' subscripts.
 #' 
 #' @title Extract Parts of Arrays with Metadata
-#' @name Extract.marray
-#' @aliases Extract.marray [.marray 
+#' @name Extract.darray
+#' @aliases Extract.darray [.darray 
 #' @usage 
-#' 	\method{[}{marray}(x, ..., drop = TRUE)
+#' 	\method{[}{darray}(x, ..., drop = TRUE)
 #'  
-#' @param x an \code{\link{marray}}.
+#' @param x an \code{\link{darray}}.
 #' @param \dots indexes for elements to extract: these can
 #' 	be either non-specified, or \code{numeric}, \code{logical}, or 
 #'  \code{character} vectors, as for standard arrays. 
@@ -33,11 +33,11 @@
 #'  number of times if necessary.	 
 #' 
 #' @seealso \link[base:Extract]{[} operator for arrays.
-#' @S3method `[` marray
+#' @S3method `[` darray
 #  NOTE: The replacement method is not needed: indexes outside bounds 
 # 		 raise an error with arrays.
 
-`[.marray` <- function(x, ..., drop = TRUE) {
+`[.darray` <- function(x, ..., drop = TRUE) {
 	dimMeta <- dimmeta(x);
 	dimNames <- dimnames(x);
 	origXDim <- dim(x); 
@@ -80,32 +80,32 @@
 		}
 
 		attr(x, "dimmeta") <- dimMeta;
-		class(x) <- "marray";
+		class(x) <- "darray";
 	}	
 			
 	x;		
 }
 
-#' Methods for combining \code{marray}s with other objects by rows or columns. 
+#' Methods for combining \code{darray}s with other objects by rows or columns. 
 #' 
 #' These methods behave as \code{rbind} and \code{cbind}, with the
 #' additional feature that attribute \code{dimmeta} (with metadata along
 #' the dimensions) is kept whenever possible. When the combined objects
-#' are not \code{marray}s, each dimension metadata is filled with either
+#' are not \code{darray}s, each dimension metadata is filled with either
 #' \code{NA}s (for atomic vectors) or \code{NULL}s (for lists). 
 #' 
-#' @title Combine marrays by Rows or Columns
-#' @aliases rbind.marray cbind.marray
+#' @title Combine darrays by Rows or Columns
+#' @aliases rbind.darray cbind.darray
 #' @usage
-#'  \method{rbind}{marray}(..., deparse.level = 1)
+#'  \method{rbind}{darray}(..., deparse.level = 1)
 #' 
-#'  \method{cbind}{marray}(..., deparse.level = 1)
+#'  \method{cbind}{darray}(..., deparse.level = 1)
 #' 
 #' @param \dots objects to be combined.
 #' @param deparse.level integer controlling the construction of labels in 
 #' 	the case of non-matrix-like arguments: see \code{\link[=cbind]{rbind}}. 
 #' 
-#' @return An \code{marray} with 2 dimensions (an "mmatrix"!) combining the 
+#' @return An \code{darray} with 2 dimensions (an "mmatrix"!) combining the 
 #' 	\dots arguments column-wise or row-wise.
 #'  
 #'  For \code{cbind} row data is taken from the first argument with 
@@ -118,9 +118,9 @@
 #'  is built combining each argument's "rowmeta", filled with \code{NA}s or
 #'  \code{NULL}s for arguments that lack a \code{dimmeta} attribute.
 #' 
-#' @S3method rbind marray
+#' @S3method rbind darray
 
-rbind.marray <- function(..., deparse.level=1) {
+rbind.darray <- function(..., deparse.level=1) {
 	dots <- list(...);	
 	if (length(dots))
 		dots <- dots[sapply(dots, length) > 0L];
@@ -130,7 +130,7 @@ rbind.marray <- function(..., deparse.level=1) {
     if (length(dots)) {
 		rowMeta <- lapply(dots, function(x) {
 				if (is.matrix(x)) {
-					if (is.marray(x)) {
+					if (is.darray(x)) {
 						result <- dimmeta(x)[[1L]];
 						if (is.list(result))
 							isList <<- TRUE;
@@ -148,7 +148,7 @@ rbind.marray <- function(..., deparse.level=1) {
 		i <- 1; 
 		while (is.null(colMeta) && i <= length(dots)) {
 			x <- dots[[i]];
-			if (is.matrix(x) && is.marray(x) && !is.null(dimmeta(x)[[2L]]))
+			if (is.matrix(x) && is.darray(x) && !is.null(dimmeta(x)[[2L]]))
 				colMeta <- dimmeta(x)[[2L]];
     		i <- i + 1;
 		} 
@@ -168,16 +168,16 @@ rbind.marray <- function(..., deparse.level=1) {
 						rep(NA, length(x))
 					else x
 				}));
-		x <- as.marray(x, dimmeta=list(rowMeta, colMeta));		
+		x <- as.darray(x, dimmeta=list(rowMeta, colMeta));		
 	}
 	
 	x;
 } 
 
 #' @nord
-#' @S3method cbind marray
+#' @S3method cbind darray
 
-cbind.marray <- function(..., deparse.level=1) {
+cbind.darray <- function(..., deparse.level=1) {
 	dots <- list(...);	
 	if (length(dots))
 		dots <- dots[sapply(dots, length) > 0L];
@@ -187,7 +187,7 @@ cbind.marray <- function(..., deparse.level=1) {
     if (length(dots)) {
 		colMeta <- lapply(dots, function(x) {
 				if (is.matrix(x)) {
-					if (is.marray(x)) {
+					if (is.darray(x)) {
 						result <- dimmeta(x)[[2L]];
 						if (is.list(result))
 							isList <<- TRUE;
@@ -205,7 +205,7 @@ cbind.marray <- function(..., deparse.level=1) {
 		i <- 1; 
 		while (is.null(rowMeta) && i <= length(dots)) {
 			x <- dots[[i]];
-			if (is.matrix(x) && is.marray(x) && !is.null(dimmeta(x)[[1L]])) {
+			if (is.matrix(x) && is.darray(x) && !is.null(dimmeta(x)[[1L]])) {
 				rowMeta <- dimmeta(x)[[1L]];
 				allNull <- FALSE;
 			}
@@ -227,7 +227,7 @@ cbind.marray <- function(..., deparse.level=1) {
 						rep(NA, length(x))
 					else x
 				}));
-		x <- as.marray(x, dimmeta=list(rowMeta, colMeta));		
+		x <- as.darray(x, dimmeta=list(rowMeta, colMeta));		
 	}
 		
 	x;
@@ -246,7 +246,7 @@ cbind.marray <- function(..., deparse.level=1) {
 #' @return An integer with the number of elements that would result
 #' 	from the selection.  
 #' @note This function is private, only to be invoked internally by 
-#' \code{[.marray}: it relies on the fact that the index has been previously
+#' \code{[.darray}: it relies on the fact that the index has been previously
 #' validated by the primitive indexing, otherwise we would need much more 
 #' checks!
 #' 
@@ -265,9 +265,9 @@ indexLenSelection <- function(x, len) {
 			length(seq_len(len)[x])
 }
 
-#' @name dimReplace.marray
+#' @name dimReplace.darray
 #' @nord
-#' @S3method `dim<-` marray
+#' @S3method `dim<-` darray
 
-`dim<-.marray` <- function(x, value) 
-    stop("modifying dimensions is not supported for marrays: coerce to array first");
+`dim<-.darray` <- function(x, value) 
+    stop("modifying dimensions is not supported for darrays: coerce to array first");

@@ -1,5 +1,5 @@
 ################################################################################
-# R PACKAGE:   metadata 
+# R PACKAGE:   dimmeta 
 # FILE:	       R/zzz.R
 # DESCRIPTION: General package definitions: main package documentation file, 
 #			   package hook events, etc. 
@@ -11,18 +11,19 @@
 ################################################################################
 
 #' \tabular{ll}{
-#' 		Package: \tab metadata\cr
+#' 		Package: \tab dimmeta\cr
 #' 		Type: \tab Package\cr
-#' 		Version: \tab 0.0-1\cr
-#' 		Date: \tab 2009-07-08\cr
+#' 		Version: \tab 0.0-2\cr
+#' 		Date: \tab > 2009-07-08 (not yet released)\cr
 #' 		License: \tab GPL (>= 2)\cr
 #' 		LazyLoad: \tab yes\cr
 #' }
 #'
-#' @title Arrays and Data Frames with Metadata
+#' @title Arrays and Data Frames with Metadata along Dimensions
 #' @name metadata-package
 #' @docType package
-#' @author Enrique Bengoechea \email{enrique.bengoechea@@credit-suisse.com}
+#' @author Enrique Bengoechea \email{enrique.bengoechea@@credit-suisse.com},
+#' 	Laurent Gautier \email{lgautier@@gmail.com}
 #' @keywords package
 #' @seealso \code{\link[base]{array}}, \code{\link[base]{data.frame}},
 #'  and packages \pkg{Biobase} and \pkg{xts}.

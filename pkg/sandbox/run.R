@@ -1,5 +1,5 @@
 ################################################################################
-# R PACKAGE:   metadata
+# R PACKAGE:   dimmeta
 # FILE:        temp/run.R
 # DESCRIPTION: Copy/paste code to facilitate testing & debugging sessions. 
 # AUTHOR:      Enrique Bengoechea <enrique.bengoechea@credit-suisse.com>
@@ -9,14 +9,14 @@ stop("not to be directly sourced!");
 
 library(DevTools);
 useDevLib();
-devPath(file.path("C:", "ebe", "Work", "Projects", "PaRiS_R", "metadata"));
+devPath(file.path("C:", "ebe", "Work", "Projects", "PaRiS_R", "dimmeta"));
 
 #library(ppTools)
 
 s("generics.R")
 s("methods_default.R")
-s("marray.R")
-s("marray_subset.R")
+s("darray.R")
+s("darray_subset.R")
 
 s("mframe.R")
 s("mframe_subset.R")

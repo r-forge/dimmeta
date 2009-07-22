@@ -1,5 +1,13 @@
 
-Version 0.1.0 [?]
+Version 0.1-1 [?]
 
- o First release
+ o Package renamed from "metadata" to "dimmeta"
+ o "darray" class renamed to "darray"
+ o Added S3 generic "unmeta"
+ o Laurent Gautier added as project developer 
+
+Version 0.1-0 [2009-07-10]
+
+ o Initial prototype distributed to developers who have provided 
+   feedback on R-devel
 

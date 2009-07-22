@@ -1,5 +1,5 @@
 ################################################################################
-# R PACKAGE:   metadata
+# R PACKAGE:   dimmeta
 # FILE:        R/generics.R
 # DESCRIPTION: Generic functions introduced in this package. 
 # AUTHOR:      Enrique Bengoechea <enrique.bengoechea@credit-suisse.com>
@@ -10,7 +10,7 @@
 #' @nord
 #' @export
 
-as.marray <- function(x, ...) UseMethod("as.marray");
+as.darray <- function(x, ...) UseMethod("as.darray");
 
 #' @nord
 #' @export
@@ -44,3 +44,9 @@ colmeta <- function(x, ...) UseMethod("colmeta");
 #' @export `colmeta<-`
 
 `colmeta<-` <- function(x, value) UseMethod("colmeta<-");
+
+#' @name unmeta
+#' @nord
+#' @export 
+
+`unmeta<-` <- function(x, ...) UseMethod("unmeta");
