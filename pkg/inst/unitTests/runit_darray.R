@@ -138,6 +138,29 @@ test_extract_2d_dfDimmeta <- svTest(function() {
 		"number of rows of data frame does not equal number of columns in array");
 })
 
+test_extract_keepAttrs <- svTest(function() {
+	xda <- list(letters[1:2], LETTERS[1:3]);
+	x <- darray(1:6, dim=c(2, 3), dimmeta=xda);
+	xa <- x;
+	attr(xa, "label") <- "test";
+	attr(xa, "other") <- 10;
+	
+	checkEquals(darray(c(1,2), c(2,1), dimmeta=list(letters[1:2], LETTERS[1])),
+		xa[,1,drop=FALSE]);	
+	checkEquals(darray(c(1,2), c(2,1), dimmeta=list(letters[1:2], LETTERS[1])),
+		xa[,1,drop=FALSE,keep.attrs=FALSE]);
+	
+	checkEquals(structure(
+			darray(c(1,2), c(2,1), dimmeta=list(letters[1:2], LETTERS[1])),
+			label="test", other=10),
+		xa[,1,drop=FALSE,keep.attrs=TRUE]);
+
+	checkEquals(structure(
+			darray(c(1,2), c(2,1), dimmeta=list(letters[1:2], LETTERS[1])),
+			other=10),
+		xa[,1,drop=FALSE,keep.attrs="other"]);	
+})
+		
 test_extract_dimmeta <- svTest(function() {
 	xda <- list(data.frame(A1=-1:-2, A2=factor(c("eur", "usd"))), 
 		list(X=1, Y=5:3, Z=list("wow!", "ja!")));

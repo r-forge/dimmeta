@@ -24,7 +24,14 @@
 #' @param x an \code{\link{darray}}.
 #' @param \dots indexes for elements to extract: these can
 #' 	be either non-specified, or \code{numeric}, \code{logical}, or 
-#'  \code{character} vectors, as for standard arrays. 
+#'  \code{character} vectors, as for standard arrays.
+#' @param keep.attrs logical flag or character vector specifying the
+#' 	attributes to preserve. This argument allows users to preserve attributes
+#'  which are removed by the default subsetting methods. If \code{TRUE},
+#'  all attributes are preserved, or none if \code{FALSE}. If it is a 
+#' 	character vector, only the supplied attributes are kepts. If a name is
+#'  provided that does not correspond to an actual attribute, a warning is
+#'  issued.
 #' @param drop logical. If \code{TRUE} the result is coerced to the lowest 
 #'  possible dimension, as for standard arrays.   
 #'  If the dimensions are actually dropped, attribute \code{dimmeta} is also
@@ -37,12 +44,38 @@
 #  NOTE: The replacement method is not needed: indexes outside bounds 
 # 		 raise an error with arrays.
 
-`[.darray` <- function(x, ..., drop = TRUE) {
+`[.darray` <- function(x, ..., keep.attrs = FALSE, drop = TRUE) {
 	dimMeta <- dimmeta(x);
 	dimNames <- dimnames(x);
-	origXDim <- dim(x); 
+	origXDim <- dim(x);
+    
+	keptAttrs <- NULL;
+	if (!identical(keep.attrs, FALSE)) {
+		allAttrs <- names(attributes(x));
+		if (is.logical(keep.attrs)) {
+			if (keep.attrs) {
+				keep.attrs <- allAttrs[!allAttrs %in%  
+						c("class", "dim", "dimnames", "dimmeta")];
+				if (length(keep.attrs))
+					keptAttrs <- attributes(x)[keep.attrs];
+			}
+		} else if (is.character(keep.attrs)) {
+			if (any(badAttrName <- !keep.attrs %in% allAttrs)) {
+				warning(ngettext(sum(badAttrName),
+					"attribute %s not found in 'x'",
+					"attributes %s not found in 'x'"),
+					paste(keep.attrs[badAttrName], collapse=", "));
+				keep.attrs <- keep.attrs[!badAttrName] 
+			}				
+			if (length(keep.attrs))
+				keptAttrs <- attributes(x)[keep.attrs];
+		} else
+			stop("'keep.attrs' must be a logical flag or a character vector of attribute names");
+	}
 	
-	x <- NextMethod();
+	# We need to force copying of x in as.array(x) as NextMethod does not
+	# work with the extra argument "keep.attrs"
+	x <- .Primitive("[")(as.array(x), ..., drop = drop);
 	nDimX <- length(dim(x)); 
 	
 	# If there's dimmeta and the result has not been dropped to
@@ -81,6 +114,8 @@
 
 		attr(x, "dimmeta") <- dimMeta;
 		class(x) <- "darray";
+		if (!is.null(keptAttrs))
+			attributes(x)[names(keptAttrs)] <- keptAttrs;
 	}	
 			
 	x;		
