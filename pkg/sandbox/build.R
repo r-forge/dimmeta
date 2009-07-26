@@ -35,6 +35,7 @@ toRm <- c(
 	"cbind.darray",
 	"dimReplace.darray",
 	"indexLenSelection",
+	"metasubset.default",
 	"metabind.default", "metabind.list", "metabind.matrix", 
 		"metabind.data.frame"	
 );

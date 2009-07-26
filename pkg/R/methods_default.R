@@ -61,16 +61,11 @@ dimmeta.default <- function(x, use.dimnames=FALSE) {
 	if (use.dimnames) { 
 		xDimnames <- dimnames(x);
 		result <- if (is.null(xDimnames))
-			lapply(result, function(x)
-    				if (length(dim(x)))
-						dimnames(x) <- NULL
-					else names(x) <- NULL)
+			lapply(result, `metanames<-`, value=NULL)
 		else {
 			isNotNull <- !sapply(result, is.null, USE.NAMES=FALSE)
 			for (i in which(isNotNull))
-				if (length(dim(result[[i]])))
-					dimnames(result[[i]])[[1L]] <- xDimnames[[i]]
-				else names(result[[i]]) <- xDimnames[[i]];
+				metanames(result[[i]]) <- xDimnames[[i]];
 			result;
 		}
 		names(result) <- names(xDimnames);
@@ -95,17 +90,11 @@ dimmeta.default <- function(x, use.dimnames=FALSE) {
 			stop(gettextf("length of '%s' [%d] must match that of '%s' [%d]",
 				"dimmeta", length(value), "dims", length(xDim)));
 		
-		for (i in which(!sapply(value, is.null))) {
-			v <- value[[i]];
-			if (length(dim(v))) {
-    			if (dim(v)[[1L]] != xDim[i])
-					stop(gettextf(
-						"dim('%s')[[1]] [%d] not equal to array extent",
-						"dimmeta", i))						
-			} else if (length(v) != xDim[i])
-				stop(gettextf("length of '%s' [%d] not equal to array extent",
-					"dimmeta", i));	
-		}
+		for (i in which(!sapply(value, is.null))) 
+			if (metalength(value[[i]]) != xDim[i])
+				stop(gettextf(
+					"dimmeta length %d (%d) not equal to dimension length (%d)",
+					i, metalength(value[[i]]), xDim[i]))						
 	
 		length(value) <- length(xDim);
 	}
@@ -150,4 +139,39 @@ unmeta.default <- function(x) {
 	if (!is.null(attr(x, "dimmeta")))
 		attr(x, "dimmeta") <- NULL;
 	x;
+}
+
+#' @nord
+#' @S3method metalength default
+
+metalength.default <- function(x) {
+	if (length(d <- dim(x)))
+		d[1L]
+	else length(x);	
+}
+
+#' @name metanamesReplace.default
+#' @nord
+#' @S3method `metanames<-` default
+
+`metanames<-.default` <- function(x, value) {
+	if (length(dim(x)))
+		dimnames(x)[[1L]] <- value
+	else names(x) <- value;
+	x;
+}
+
+#' @nord
+#' @S3method metasubset default
+
+metasubset.default <- function(x, i, names, exact=TRUE) {
+	if (is.null(x)) return(NULL);	
+	if (is.character(i))		
+		i <- if (exact) 
+			match(i, names, nomatch=0L) 
+		else pmatch(i, names, duplicates.ok=TRUE, nomatch=0L);
+	
+	if (is.null(dim(x)))
+		x[i]
+	else x[i,,drop=FALSE];
 }

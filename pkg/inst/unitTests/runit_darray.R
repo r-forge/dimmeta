@@ -117,7 +117,7 @@ test_extract_2d_indexEdgeCases <- svTest(function() {
 		x[NA, ]);	
 })
 
-test_extract_2d_dfDimmeta <- svTest(function() {
+test_extract_2d_dimmetaDF <- svTest(function() {
 	xda <- list(data.frame(X1=c(-1, -2), X2=factor(c("eur", "usd"))), 
 		list(X=1, Y=5:3, Z=list("wow!", "ja!")));
 	x <- darray(1:6, dim=c(2, 3), dimmeta=xda);

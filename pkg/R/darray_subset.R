@@ -102,15 +102,9 @@
 		doSubset <- mapply(function(meta, index) 
 				length(meta) && !identical(TRUE, index),
 			meta=dimMeta, index=indexes, USE.NAMES=FALSE);
-		for (i in which(doSubset)) {
-    		index <- indexes[[i]];
-			if (is.character(index))
-				index <- match(index, dimNames[[i]], nomatch=0L)
-			meta <- dimMeta[[i]];
-    		dimMeta[[i]] <- if (length(dim(meta))) 
-				meta[index,,drop=FALSE]
-			else meta[index]
-		}
+		for (i in which(doSubset)) 
+			dimMeta[[i]] <- 
+				metasubset(dimMeta[[i]], indexes[[i]], dimNames[[i]]);
 
 		attr(x, "dimmeta") <- dimMeta;
 		class(x) <- "darray";

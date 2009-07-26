@@ -83,6 +83,7 @@
 #' 	of dimensions. Each list component can be \code{NULL}, an object without
 #' 	dimensions whose length equals the number of elements in the array
 #' 	dimension, or an object with dimensions whose number of elements in
+#'  its first dimension equals the number of elements in the array dimension. 
 #'	If the list is shorter than the number of dimensions, it is 
 #'  extended by \code{NULL}s to the length required.
 #' @param x an \R object.
@@ -164,8 +165,9 @@ is.darray <- function(x)
 #' @nord
 #' @S3method as.darray default
 
-as.darray.default <- function(x, dimmeta = NULL, ...) { 
-	x <- as.array(x);
+as.darray.default <- function(x, dimmeta = NULL, ...) {
+	if (!is.array(x))
+		x <- as.array(x);
 	if (length(dimmeta))
 		dimmeta(x) <- dimmeta;
 	class(x) <- "darray";
