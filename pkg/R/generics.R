@@ -15,6 +15,11 @@ as.darray <- function(x, ...) UseMethod("as.darray");
 #' @nord
 #' @export
 
+as.dframe <- function(x, ...) UseMethod("as.dframe");
+
+#' @nord
+#' @export
+
 dimmeta <- function(x, ...) UseMethod("dimmeta");
 
 #' @name dimmetaReplace

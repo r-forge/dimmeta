@@ -13,5 +13,5 @@ Depends: R (>= 2.8.1)
 Suggests: svUnit
 License: GPL-2
 LazyLoad: yes
-Collate: 'darray.R' 'darray_bind.R' 'darray_subset.R' 'generics.R'
-    'methods_default.R' 'zzz.R'
+Collate: 'generics.R' 'methods_default.R' 'darray.R' 'darray_bind.R' 
+	'darray_subset.R' 'dframe.R' 'dframe_subset.R'  'zzz.R'
