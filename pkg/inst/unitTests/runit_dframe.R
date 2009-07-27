@@ -177,3 +177,39 @@ test_extract_dimmetaDF <- svTest(function() {
 			y, "out-of-bounds rows with data frames as dimmeta");
 })
 
+test_extract_keepAttrs <- svTest(function() {
+	xda <- list(letters[1:2], LETTERS[1:3]);
+	x <- dframe(X=1:2, Y=c("eur", "usd"), Z=I(c("A", "B")), dimmeta=xda);
+	attr(x, "test") <- 100L;
+	attr(x, "more") <- "X";
+	
+	ya <- ya1 <- y <- dframe(X=1:2, dimmeta=list(letters[1:2], "A"));
+	attr(ya, "test") <- 100L;
+	attr(ya, "more") <- "X";
+	attr(ya1, "test") <- 100L;
+		
+	checkEquals(y, x[1]);
+	checkEquals(y, x[1, keep.attrs=FALSE]);
+	checkEquals(ya, x[1, keep.attrs=TRUE]);
+	checkEquals(ya1, x[1, keep.attrs="test"]);
+	
+	checkEquals(y, x[, 1, drop=FALSE]);
+	checkEquals(y, x[, 1, keep.attrs=FALSE, drop=FALSE]);
+	checkEquals(ya, x[, 1, keep.attrs=TRUE, drop=FALSE]);
+	checkEquals(ya1, x[, 1, drop=FALSE, keep.attrs="test"]);
+	
+	checkEquals(y, x[1:2, 1, drop=FALSE]);
+	checkEquals(y, x[1:2, 1, keep.attrs=FALSE, drop=FALSE]);
+	checkEquals(ya, x[1:2, 1, keep.attrs=TRUE, drop=FALSE]);
+	checkEquals(ya1, x[1:2, 1, drop=FALSE, keep.attrs="test"]);
+
+	ya <- ya1 <- y <- x[2,,drop=FALSE];
+	attr(ya, "test") <- 100L;
+	attr(ya, "more") <- "X";
+	attr(ya1, "test") <- 100L;
+	
+	checkEquals(y, x[2,]);
+	checkEquals(y, x[2, , keep.attrs=FALSE, drop=FALSE]);
+	checkEquals(ya, x[2, , keep.attrs=TRUE, drop=FALSE]);
+	checkEquals(ya1, x[2, , drop=FALSE, keep.attrs="test"]);		
+})

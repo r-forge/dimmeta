@@ -25,11 +25,11 @@
 #' @param \dots indexes for elements to extract: these can
 #' 	be either non-specified, or \code{numeric}, \code{logical}, or 
 #'  \code{character} vectors, as for standard arrays.
-#' @param keep.attrs logical flag or character vector specifying the
+#' @param keep.attrs logical flag or character vector specifying user-defined 
 #' 	attributes to preserve. This argument allows users to preserve attributes
 #'  which are removed by the default subsetting methods. If \code{TRUE},
 #'  all attributes are preserved, or none if \code{FALSE}. If it is a 
-#' 	character vector, only the supplied attributes are kepts. If a name is
+#' 	character vector, only the supplied attributes are kept. If a name is
 #'  provided that does not correspond to an actual attribute, a warning is
 #'  issued.
 #' @param drop logical. If \code{TRUE} the result is coerced to the lowest 
@@ -47,32 +47,10 @@
 `[.darray` <- function(x, ..., keep.attrs = FALSE, drop = TRUE) {
 	dimMeta <- dimmeta(x);
 	dimNames <- dimnames(x);
-	origXDim <- dim(x);
-    
-	keptAttrs <- NULL;
-	if (!identical(keep.attrs, FALSE)) {
-		allAttrs <- names(attributes(x));
-		if (is.logical(keep.attrs)) {
-			if (keep.attrs) {
-				keep.attrs <- allAttrs[!allAttrs %in%  
-						c("class", "dim", "dimnames", "dimmeta")];
-				if (length(keep.attrs))
-					keptAttrs <- attributes(x)[keep.attrs];
-			}
-		} else if (is.character(keep.attrs)) {
-			if (any(badAttrName <- !keep.attrs %in% allAttrs)) {
-				warning(ngettext(sum(badAttrName),
-					"attribute %s not found in 'x'",
-					"attributes %s not found in 'x'"),
-					paste(keep.attrs[badAttrName], collapse=", "));
-				keep.attrs <- keep.attrs[!badAttrName] 
-			}				
-			if (length(keep.attrs))
-				keptAttrs <- attributes(x)[keep.attrs];
-		} else
-			stop("'keep.attrs' must be a logical flag or a character vector of attribute names");
-	}
-	
+	origXDim <- dim(x);    
+	keptAttrs <- keptAttrs(x, keep.attrs, 
+		c("class", "dim", "dimnames", "dimmeta"))
+
 	# We need to force copying of x in as.array(x) as NextMethod does not
 	# work with the extra argument "keep.attrs"
 	x <- .Primitive("[")(as.array(x), ..., drop = drop);
@@ -108,7 +86,7 @@
 
 		attr(x, "dimmeta") <- dimMeta;
 		class(x) <- "darray";
-		if (!is.null(keptAttrs))
+		if (length(keptAttrs))
 			attributes(x)[names(keptAttrs)] <- keptAttrs;
 	}	
 			
@@ -145,6 +123,54 @@ indexLenSelection <- function(x, len) {
 			sum(as.integer(x) != 0L)
 		else
 			length(seq_len(len)[x])
+}
+
+#' This function is used by subsetting methods in the \pkg{dimmeta} package 
+#' to determine the set of user-defined attributes to keep.
+#' 
+#' @title Attributes to Keep on Subset
+#' @param x an \R object. 
+#' @param keep.attrs specification of attributes to preserve. Either a logical 
+#' 	flag or a character vector specifying attributes names. 
+#'  If \code{TRUE}, all attributes (except those in \code{standard.attrs}) are 
+#' 	preserved, or none if \code{FALSE}. If it is a character vector, only the 
+#' 	supplied attributes are kept. If a name is provided that does not 
+#' 	correspond to an actual attribute, a warning is issued. 
+#' @param standard.attrs character vector of attributes names that should
+#' 	be ignored (e.g. "\code{class}", "\code{names}", "\code{dim}", etc.)
+#' 
+#' @return A list of user-defined attributes of \code{x} to be preserved,
+#' 	or \code{NULL} if there are no such attributes.
+#' @note This is an internal, non-exported function. 
+#' @seealso
+#  NOT EXPORTED
+
+keptAttrs <- function(x, keep.attrs = TRUE, 
+		standard.attrs=c("class", "names", "row.names", "dim", "dimnames", 
+		"dimmeta")) { 
+	result <- NULL;
+	if (!missing(keep.attrs) && !identical(keep.attrs, FALSE)) {
+		attrsNames <- names(attributes(x));
+		if (is.logical(keep.attrs)) {
+			if (keep.attrs) {
+				keep.attrs <- attrsNames[!attrsNames %in% standard.attrs];
+				if (length(keep.attrs))
+					result <- attributes(x)[keep.attrs];
+			}
+		} else if (is.character(keep.attrs)) {
+			if (any(badAttrName <- !keep.attrs %in% attrsNames)) {
+				warning(ngettext(sum(badAttrName),
+					"attribute %s not found in 'x'",
+					"attributes %s not found in 'x'"),
+					paste(keep.attrs[badAttrName], collapse=", "));
+				keep.attrs <- keep.attrs[!badAttrName] 
+			}				
+			if (length(keep.attrs))
+				result <- attributes(x)[keep.attrs];
+		} else
+			stop("'keep.attrs' must be a logical flag or a character vector of attribute names");
+	}
+	result;
 }
 
 #' @name dimReplace.darray

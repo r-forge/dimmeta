@@ -20,17 +20,18 @@
 #' @name Extract.dframe
 #' @aliases Extract.dframe [.dframe 
 #' @usage 
-#' 	\method{[}{dframe}(x, ..., drop = TRUE)
+#' 	\method{[}{dframe}(x, i, j, 
+#' 		drop = if (missing(i)) TRUE else length(cols) == 1)
 #'  
 #' @param x an \code{\link{dframe}}.
-#' @param \dots indexes for elements to extract: these can
+#' @param i,j indexes for elements to extract: these can
 #' 	be either non-specified, or \code{numeric}, \code{logical}, or 
 #'  \code{character} vectors, as for standard data frames.
-#' @param keep.attrs logical flag or character vector specifying the
+#' @param keep.attrs logical flag or character vector specifying user-defined
 #' 	attributes to preserve. This argument allows users to preserve attributes
 #'  which are removed by the default subsetting methods. If \code{TRUE},
 #'  all attributes are preserved, or none if \code{FALSE}. If it is a 
-#' 	character vector, only the supplied attributes are kepts. If a name is
+#' 	character vector, only the supplied attributes are kept. If a name is
 #'  provided that does not correspond to an actual attribute, a warning is
 #'  issued.
 #' @param drop logical. If \code{TRUE} the result is coerced to the lowest 
@@ -48,12 +49,14 @@
 #			as out-of-bound rows can be selected (out-of-bound columns cannot)
 #  	     Modified lines are marked with '##dframe'.
 
-`[.dframe` <- function (x, i, j, 
+`[.dframe` <- function (x, i, j, keep.attrs = FALSE, 
 		drop = if (missing(i)) TRUE else length(cols) == 1) {
 	dm <- dimmeta(x)	## dframe
 	hasDimmeta <- !is.null(dm)
     mdrop <- missing(drop)
-    Narg <- nargs() - (!mdrop)
+	keptAttrs <- keptAttrs(x, keep.attrs, 
+		c("class", "names", "row.names", "dimmeta"))		## dframe
+    Narg <- nargs() - (!mdrop)  - (!missing(keep.attrs))	## dframe
     has.j <- !missing(j)
     if (Narg < 3L) {
         if (!mdrop) 
@@ -67,14 +70,16 @@
             nm <- character(0L)
         if (!is.character(i) && any(is.na(nm))) {
             names(nm) <- names(x) <- seq_along(x)
-            y <- NextMethod("[")
+            #y <- NextMethod("[")
+			y <- .Primitive("[")(as.data.frame(x), i)		## dframe
             cols <- names(y)
             if (any(is.na(cols))) 
                 stop("undefined columns selected")
             cols <- names(y) <- nm[cols]
         }
         else {
-            y <- NextMethod("[")
+			#y <- NextMethod("[")
+			y <- .Primitive("[")(as.data.frame(x), i)		## dframe
             cols <- names(y)
             if (!is.null(cols) && any(is.na(cols))) 
                 stop("undefined columns selected")
@@ -82,10 +87,13 @@
         if (any(duplicated(cols))) 
             names(y) <- make.unique(cols)
 
-		if (hasDimmeta)		## dframe
-			dm[[2L]] <- metasubset(dm[[2L]], i, nm);			
-        return(structure(y, class = oldClass(x), row.names = .row_names_info(x, 
-            0L), dimmeta = dm))
+		if (hasDimmeta)					## dframe
+			dm[[2L]] <- metasubset(dm[[2L]], i, nm);
+		result <- structure(y, class = oldClass(x), 
+			row.names = .row_names_info(x, 0L), dimmeta = dm)
+		if (length(keptAttrs))		## dframe
+			attributes(result)[names(keptAttrs)] <- keptAttrs;
+		return(result)
     }
     if (missing(i)) {
         if (missing(j) && drop && length(x) == 1L)			
@@ -119,16 +127,19 @@
         if (drop && !mdrop && nrow == 1L) 
             return(structure(y, class = NULL, row.names = NULL))
         else {
-			if (hasDimmeta)		## dframe
+			if (hasDimmeta)				## dframe
 				dm[[2L]] <- metasubset(dm[[2L]], j, nm);			
-			return(structure(y, class = oldClass(x), 
-				row.names = .row_names_info(x, 0L), dimmeta = dm))
+			result <- structure(y, class = oldClass(x), 
+				row.names = .row_names_info(x, 0L), dimmeta = dm)
+			if (length(keptAttrs))	## dframe
+				attributes(result)[names(keptAttrs)] <- keptAttrs;		
+			return(result)
 		}
     }
     xx <- x
     cols <- names(xx)
     x <- vector("list", length(x))
-    x <- .Call("R_copyDFattr", xx, x, PACKAGE = "base")
+    x <- .Call("R_copyDFattr", xx, x, PACKAGE = "base")	
     oldClass(x) <- attr(x, "row.names") <- NULL
     if (!missing(j)) {
         nm <- names(x)
@@ -203,6 +214,10 @@
         attr(x, "row.names") <- rows
         oldClass(x) <- oldClass(xx)
     }
-	attr(x, "dimmeta") <- dm		## dframe	
+	attr(x, "dimmeta") <- dm		## dframe
+	if (length(keptAttrs))		## dframe
+		attributes(x)[names(keptAttrs)] <- keptAttrs;			
     x
 }
+
+
