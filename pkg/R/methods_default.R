@@ -214,33 +214,41 @@ metalength.default <- function(x) {
 #'  releted dimension exactly as vectors do, allowing out-of-range indexes
 #'  that return NAs (by default, these indexes raise errors with arrays) 
 
-metasubset.default <- function(x, i, names, exact=TRUE) {
+metasubset.default <- function(x, i, nams, exact=TRUE, rm=FALSE) {
 	if (is.null(x)) return(NULL);
 	metaLen <- metalength(x);
 	if (is.character(i)) {
-		if (missing(names))
-			if (is.null(names <- names(x)))				
+		if (missing(nams)) 
+			if (is.null(nams <- names(x)))				
 				stop("names are required for character index")
 		i <- if (exact) 
-			match(i, names, nomatch=metaLen+1) 
-		else pmatch(i, names, duplicates.ok=TRUE, nomatch=metaLen+1);
-	}
+			match(i, nams, nomatch=if (rm) 0L else metaLen+1L) 
+		else pmatch(i, nams, duplicates.ok=TRUE, 
+				nomatch=if (rm) 0L else metaLen+1L);
+	}	
+	if (rm) 
+		i <- invertIndex(i, metaLen);
 	
 	if (length(d <- dim(x))) {
+		# `[` for arrays does not allow out-of-bound indexes, so we bind
+    	# one "row" filled with NAs and change indexes to new elements to
+		# this new row before invoking the array `[` method.
 		isNew <- FALSE;
-		if (is.logical(i) && length(i) > metaLen) {
-			i <- which(i);
-			isNew <- (i > metaLen); 
-			i[isNew] <- metaLen + 1;
-		} else if (is.numeric(i))
-			if (any(isNew <- (as.integer(i) > metaLen)))
-				i[isNew] <- metaLen + 1
-		if (any(isNew)) {
-			# abind() adds a "dimnames" attribute even if it is not
-			# present in x, so we just ensure dimnames are not modified
-    		nodmn <- is.null(dimnames(x));
-			x <- abind(x, array(NA, c(sum(isNew), d[-1L])), along=1L)
-			if (nodmn) dimnames(x) <- NULL;
+		if (!rm) {
+			if (is.logical(i) && length(i) > metaLen) {
+				i <- which(i);
+				isNew <- (i > metaLen); 
+				i[isNew] <- metaLen + 1;
+			} else if (is.numeric(i))
+				if (any(isNew <- (as.integer(i) > metaLen)))
+					i[isNew] <- metaLen + 1
+			if (any(isNew)) {
+				# abind() adds a "dimnames" attribute even if it is not
+				# present in x, so we just ensure dimnames are not modified
+	    		nodmn <- is.null(dimnames(x));
+				x <- abind(x, array(NA, c(sum(isNew), d[-1L])), along=1L)
+				if (nodmn) dimnames(x) <- NULL;
+			}
 		}
 		iargs <- sapply(d[-1L], function(y) if (y == 0L) 0L else TRUE);			
 		do.call("[", c(list(x, i), iargs, drop=FALSE));
@@ -250,17 +258,49 @@ metasubset.default <- function(x, i, names, exact=TRUE) {
 #' @nord
 #' @S3method metasubset data.frame
 
-metasubset.data.frame <- function(x, i, names, exact=TRUE) {
+metasubset.data.frame <- function(x, i, nams, exact=TRUE, rm=FALSE) {
 	if (is.null(x)) return(NULL);
-	if (is.character(i)) {
-		metaLen <- metalength(x);
-		if (missing(names))
-			if (is.null(names <- names(x)))				
+	metaLen <- metalength(x);
+	if (is.character(i)) {		
+		if (missing(nams))
+			if (is.null(nams <- names(x)))				
 				stop("names are required for character index")
 		i <- if (exact) 
-			match(i, names, nomatch=metaLen+1) 
-		else pmatch(i, names, duplicates.ok=TRUE, nomatch=metaLen+1);
+			match(i, nams, nomatch=if (rm) 0L else metaLen+1L) 
+		else pmatch(i, nams, duplicates.ok=TRUE, 
+				nomatch=if (rm) 0L else metaLen+1L);
 	}
+	if (rm) 
+		i <- invertIndex(i, metaLen);
 	
 	x[i,,drop=FALSE];		
+}
+
+#' Internal function to inverts a subscripting index, so that it is 
+#' interpreted as selecting the elements to remove, rather than those to 
+#' subset.
+#' 
+#' @note This is an internal, non-exported function.
+#  NOT EXPORTED
+
+invertIndex <- function(i, len, nams, exact=TRUE) {
+	if (is.numeric(i)) {
+		i <- as.integer(i)
+		if (all(i == 0L))
+			seq_len(len)
+		else if (all(i >= 0L))
+			-i
+		else if (all(i <= 0L))
+			-seq_len(len)[i]
+		else stop("numeric indexes must be all positive or all negative")
+	} else if (is.logical(i))
+		!i
+	else if (is.character(i)) {
+		if (missing(nams) || is.null(nams(x)))				
+			stop("names are required for character index")		
+		if (exact)
+			-match(i, nams, nomatch=0L) 
+		else -pmatch(i, nams, duplicates.ok=TRUE, nomatch=0L);
+	} else
+		stop(gettextf("invalid subscript type '%s'", class(i)));
 }

@@ -41,7 +41,7 @@ toRm <- c(
 	"metabind.default", "metabind.list", "metabind.matrix", 
 		"metabind.data.frame",
 	"as.dframe", "as.dframe.default", "as.dframe.dframe", 
-	"dframeReplace", "xpdrows.dframe"
+	"dframeReplace", "xpdrows.dframe", "dframeReplace2"
 );
  
 unlink(file.path(devPath(), "man", paste(toRm, ".Rd", sep="")))

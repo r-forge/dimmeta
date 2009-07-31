@@ -52,12 +52,12 @@ test_extract_colsOnly <- svTest(function() {
 test_extract_rowsOnly <- svTest(function() {
 	xda <- list(letters[1:2], LETTERS[1:3]);
 	x <- dframe(X=1:2, Y=c("eur", "usd"), Z=I(c("A", "B")), 
-		row.names=c("r1", "r2"), dimmeta=xda);
+		row.names=c("r11", "r21"), dimmeta=xda);
 	
 	checkEquals(dframe(X=2, Y=factor("usd", levels=c("eur", "usd")), Z=I("B"),
-		row.names="r2", dimmeta=list("b", c("A", "B", "C"))), 
+		row.names="r21", dimmeta=list("b", c("A", "B", "C"))), 
 		x["r2",,drop=FALSE], 
-		"subset one row using a character vector");
+		"subset one row using a character vector and partial matching");
 
 	# With drop=TRUE, returns a list instead of a data.frame. dimmeta 
 	# attribute is kept and subsetted.
@@ -424,4 +424,44 @@ test_replace_modifyDimmetaDF <- svTest(function() {
 			data.frame(labels=I(character(0)), units=I(character(0))))),
 		y, "remove row with [,j]<-NULL syntax also subsets colmeta");		
 		
+})
+
+
+test_replace2_dimNotModified <- svTest(function() {
+	xda <- list(letters[1:2], LETTERS[1:2]);
+	x <- dframe(X=1:2, Y=I(c("a", "b")), dimmeta=xda);
+
+	y <- x; y[[2, 1]] <- 3;
+	checkEquals(dframe(X=c(1, 3), Y=I(c("a", "b")), dimmeta=xda), y);
+	
+	y <- x; y[["Y"]] <- "c";
+	checkEquals(dframe(X=c(1, 2), Y=c("c", "c"), stringsAsFactors=FALSE, 
+		dimmeta=xda), y);
+
+	y <- x; y[1,] <- 6;
+	checkEquals(dframe(X=c(6, 2), Y=I(c("6", "b")), dimmeta=xda), y);
+	
+	checkException(x[[3, 3]] <- 5, "non-existing column 3");
+	checkException(x[[1,]] <- 1, "missing j");
+	checkException(x[[,1]] <- 1, "missing i");
+	checkException(x[[]] <- 1, "missing subscripts");		
+})
+
+test_replace_modify2DimmetaAtomicVector <- svTest(function() {
+	xda <- list(letters[1:2], LETTERS[1]);
+	x <- dframe(X=1:2, dimmeta=xda);
+
+	y <- x;	y[[4, 1]] <- 4;
+	checkEquals(dframe(X=c(1, 2, NA, 4), 
+		dimmeta=list(c("a", "b", NA, NA), "A")), y,
+		"add row with [i, j] syntax adds NA to rowmeta");
+	
+	y <- x; y[["W"]] <- 10;
+	checkEquals(dframe(X=c(1, 2), W=c(10, 10), 
+		dimmeta=list(c("a", "b"), c("A", NA))), y,
+		"add colum with [i] syntax adds NA to colmeta");
+	
+	y <- x; y[[1]] <- NULL;
+	checkEquals(dframe(row.names=1:2, dimmeta=list(c("a", "b"), character(0))),
+    	y, "remove row with [i]<-NULL syntax also subsets rowmeta") 
 })

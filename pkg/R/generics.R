@@ -127,11 +127,14 @@ metalength <- function(x) UseMethod("metalength");
 #' @param exact logical flag. If \code{TRUE} and name matching is used
 #' 	(when \code{i} is a character vector), uses \link{match}{exact} string 
 #' 	matching. When \code{FALSE}, uses \link{pmatch}{partial} matching.
+#' @param rm logical flag. If \code{TRUE}, the \code{i} index is interpreted
+#' 	as subscripting the elements to remove from \code{x}. Defaults to 
+#'  \code{FALSE}. 
 #'  
 #' @return A subset of \code{x}. 
 #' @export
 
-metasubset <- function(x, i, names, exact) UseMethod("metasubset");
+metasubset <- function(x, i, names, exact, rm) UseMethod("metasubset");
 
 #' Generic function invoked by \code{\link{rbind.darray}} and 
 #' \code{cbind.darray} to bind dimension metadata along the dimension
