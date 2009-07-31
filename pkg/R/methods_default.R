@@ -168,7 +168,7 @@ metalength.default <- function(x) {
 			# present in x, so we just ensure dimnames are not modified
 			nodmn <- is.null(dimnames(x));
 			x <- abind(x, array(NA, c(value-nrows, d[-1L])), along=1L)
-			if (nodmn) dimanmes(x) <- NULL;
+			if (nodmn) dimnames(x) <- NULL;
 		} else if (value < nrows) {
 			iargs <- sapply(d[-1L], function(y) if (y == 0L) 0L else TRUE);			
 			x <- do.call("[", c(list(i, seq_len(value)), iargs, drop=FALSE))		

@@ -151,7 +151,25 @@ test_extract_dimmetaList <- svTest(function() {
 #		y, "subset out-of-bound rows and columns with list dimmeta");
 	checkEquals(data.frame(Z=I(c("A", NA_character_))),
 		as.data.frame(y));
-	checkEquals(list("r1", NULL), dimmeta(y)[[1L]], checkNames=FALSE)
+	checkEquals(list("r1", NULL), dimmeta(y)[[1L]], 
+		msg="extraction of out-of-bounds row index produce NULL in the dimmeta list",
+		checkNames=FALSE)
+})
+
+test_extract_dimmetaArray <- svTest(function() {
+	xda <- list(array(1:4, c(2, 1, 2)), array(10:22, c(2, 3, 2)));  
+	x <- dframe(X=1:2, Z=I(c("A", "B")), row.names=c("r1", "r2"), dimmeta=xda);
+	
+	checkEquals(dframe(Z=I("B"), X=2, row.names="r2", 
+		dimmeta=list(xda[[1L]][2,,,drop=FALSE], xda[[2L]][2:1,,,drop=FALSE])), 
+		x[2, c("Z", "X")], "normal extraction");
+	
+	y <- x[c(1,5), c(FALSE, TRUE), drop=FALSE];
+	row.names(y) <- NULL;	
+	checkEquals(dframe(Z=I(c("A", NA_character_)), 
+		dimmeta=list(array(c(1, NA, 3, NA), c(2, 1, 2)),  
+			xda[[2L]][2,,,drop=FALSE])), y, 
+		"extraction of out-of-bounds row index produce NAs in the dimmeta array");
 })
 
 test_extract_dimmetaDF <- svTest(function() {
@@ -212,4 +230,198 @@ test_extract_keepAttrs <- svTest(function() {
 	checkEquals(y, x[2, , keep.attrs=FALSE, drop=FALSE]);
 	checkEquals(ya, x[2, , keep.attrs=TRUE, drop=FALSE]);
 	checkEquals(ya1, x[2, , drop=FALSE, keep.attrs="test"]);		
+})
+
+test_replace_dimNotModified <- svTest(function() {
+	xda <- list(letters[1:2], LETTERS[1]);
+	x <- dframe(X=1:2, dimmeta=xda);
+
+	y <- x; y[c(FALSE, TRUE), 1] <- 3;
+	checkEquals(dframe(X=c(1, 3), dimmeta=xda), y);
+	
+	y <- x; y[1] <- 4;
+	checkEquals(dframe(X=c(4, 4), dimmeta=xda), y);
+
+	y <- x; y[,TRUE] <- 5;
+	checkEquals(dframe(X=c(5, 5), dimmeta=xda), y);
+
+	y <- x; y[1,] <- 6;
+	checkEquals(dframe(X=c(6, 2), dimmeta=xda), y);
+	
+	y <- x; y[] <- 7;
+	checkEquals(dframe(X=c(7, 7), dimmeta=xda), y);
+})
+
+test_replace_indexEdgeCases <- svTest(function() {
+	xda <- list(letters[1:2], LETTERS[1]);
+	x <- dframe(X=1:2, dimmeta=xda);
+		
+	checkException(x[NA] <- 1);
+	checkException(x[,NA] <- 1);	
+	checkException(x[NA,] <- 1);
+	checkException(x[NA, NA] <- 1);
+	
+	checkException(x[0L] <- 1);
+	checkException(x[,0L] <- 1);	
+	checkException(x[0L, 0L] <- 1);
+
+	y <- x; y[0L,] <- 100; checkEquals(y, x);
+	
+	y <- x; y[NULL] <- 100; checkEquals(y, x);
+	y <- x; y[,NULL] <- 100; checkEquals(y, x);
+	y <- x; y[NULL,] <- 100; checkEquals(y, x);
+	y <- x; y[NULL, NULL] <- 100; checkEquals(y, x);
+	
+	y <- x; y[integer(0)] <- 100; checkEquals(y, x);
+	y <- x; y[,logical(0)] <- 100; checkEquals(y, x);
+	y <- x; suppressWarnings(y[character(0),] <- 100); checkEquals(y, x);
+	y <- x; suppressWarnings(y[logical(0), character(0)] <- 100); 
+		checkEquals(y, x);		
+})
+
+test_replace_modifyDimmetaAtomicVector <- svTest(function() {
+	xda <- list(letters[1:2], LETTERS[1]);
+	x <- dframe(X=1:2, dimmeta=xda);
+
+	y <- x;	y[4, 1] <- 4;
+	checkEquals(dframe(X=c(1, 2, NA, 4), 
+		dimmeta=list(c("a", "b", NA, NA), "A")), y,
+		"add row with [i, j] syntax adds NA to rowmeta");
+	
+	y <- x; y["W"] <- 10;
+	checkEquals(dframe(X=c(1, 2), W=c(10, 10), 
+		dimmeta=list(c("a", "b"), c("A", NA))), y,
+		"add colum with [i] syntax adds NA to colmeta");
+
+	y <- x; y[,"W"] <- 10;
+	checkEquals(dframe(X=c(1, 2), W=c(10, 10), 
+		dimmeta=list(c("a", "b"), c("A", NA))), y,
+		"add column with [,j] syntax adds NA to colmeta");
+
+	y <- x; y[3, 2] <- 5;
+	checkEquals(dframe(X=c(1, 2, NA), V2=c(NA, NA, 5), 
+		dimmeta=list(c("a", "b", NA), c("A", NA))), y,
+		"add row and column with [i, j] syntax add NAs to row & colmeta");
+	
+	y <- x; y[1] <- NULL;
+	checkEquals(dframe(row.names=1:2, dimmeta=list(c("a", "b"), character(0))),
+    	y, "remove row with [i]<-NULL syntax also subsets rowmeta") 
+
+	y <- x; y[,1] <- NULL;
+	checkEquals(dframe(row.names=1:2, dimmeta=list(c("a", "b"), character(0))), 
+		y, "remove row with [,j]<-NULL syntax also subsets colmeta");		
+})
+
+test_replace_modifyDimmetaList <- svTest(function() {
+	xda <- list(list("a", "b"), list(1:2));
+	x <- dframe(X=1:2, dimmeta=xda);
+
+	y <- x;	y[4, 1] <- 4;
+	checkEquals(dframe(X=c(1, 2, NA, 4), 
+		dimmeta=list(list("a", "b", NULL, NULL), list(1:2))), y,
+		"add row with [i, j] syntax adds NULL to rowmeta");
+	
+	y <- x; y["W"] <- 10;
+	checkEquals(dframe(X=c(1, 2), W=c(10, 10), 
+		dimmeta=list(list("a", "b"), list(1:2, NULL))), y,
+		"add colum with [i] syntax adds NULL to colmeta");
+
+	y <- x; y[,"W"] <- 10;
+	checkEquals(dframe(X=c(1, 2), W=c(10, 10), 
+		dimmeta=list(list("a", "b"), list(1:2, NULL))), y,
+		"add column with [,j] syntax adds NULL to colmeta");
+
+	y <- x; y[3, 2] <- 5;
+	checkEquals(dframe(X=c(1, 2, NA), V2=c(NA, NA, 5), 
+		dimmeta=list(list("a", "b", NULL), list(1:2, NULL))), y,
+		"add row and column with [i, j] syntax add NULLs to row & colmeta");
+	
+	y <- x; y[1] <- NULL;
+	checkEquals(dframe(row.names=1:2, dimmeta=list(list("a", "b"), list())),
+    	y, "remove row with [i]<-NULL syntax also subsets rowmeta") 
+
+	y <- x; y[,1] <- NULL;
+	checkEquals(dframe(row.names=1:2, dimmeta=list(list("a", "b"), list())), 
+		y, "remove row with [,j]<-NULL syntax also subsets colmeta");		
+})
+
+test_replace_modifyDimmetaArray <- svTest(function() {
+	xda <- list(array(1:4, c(2, 1, 2)), array(10:11, c(1, 2, 1)));
+	x <- dframe(X=1:2, dimmeta=xda);
+
+	y <- x;	y[4, 1] <- 4;
+	checkEquals(dframe(X=c(1, 2, NA, 4), 
+		dimmeta=list(array(c(1,2,NA,NA,3,4,NA,NA), c(4, 1, 2)), xda[[2L]])), y,
+		"add row with [i, j] syntax adds rows to rowmeta");
+	
+	y <- x; y["W"] <- 10;
+	checkEquals(dframe(X=c(1, 2), W=c(10, 10), 
+		dimmeta=list(xda[[1L]], array(c(10, NA, 11, NA), c(2, 2, 1)))), y,
+		"add colum with [i] syntax adds rows to colmeta");
+
+	y <- x; y[,"W"] <- 10;
+	checkEquals(dframe(X=c(1, 2), W=c(10, 10), 
+		dimmeta=list(xda[[1L]], array(c(10, NA, 11, NA), c(2, 2, 1)))), y,
+		"add column with [,j] syntax adds rows to colmeta");
+
+	y <- x; y[3, 2] <- 5;
+	checkEquals(dframe(X=c(1, 2, NA), V2=c(NA, NA, 5), 
+		dimmeta=list(array(c(1,2,NA,3,4,NA), c(3, 1, 2)), 
+			array(c(10, NA, 11, NA), c(2, 2, 1)))), y,
+		"add row and column with [i, j] syntax add rows to row & colmeta");
+	
+	y <- x; y[1] <- NULL;
+	checkEquals(dframe(row.names=1:2, 
+			dimmeta=list(xda[[1L]], array(numeric(0), dim=c(0,2,1)))),
+    	y, "remove row with [i]<-NULL syntax also subsets rowmeta") 
+
+	y <- x; y[,1] <- NULL;
+	checkEquals(dframe(row.names=1:2, 
+			dimmeta=list(xda[[1L]], array(numeric(0), dim=c(0,2,1)))), 
+		y, "remove row with [,j]<-NULL syntax also subsets colmeta");		
+		
+})
+
+test_replace_modifyDimmetaDF <- svTest(function() {
+	xda <- list(data.frame(A=-1:-2, B=I(c("x", "y"))), 
+		data.frame(labels=I("fc"), units=I("m")));
+	x <- dframe(X=1:2, dimmeta=xda);
+
+	y <- x;	y[4, 1] <- 4;
+	checkEquals(dframe(X=c(1, 2, NA, 4), 
+		dimmeta=list(data.frame(A=c(-1,-2,NA,NA), B=I(c("x", "y", NA, NA))),
+			xda[[2L]])), y,
+		"add row with [i, j] syntax adds rows to rowmeta");
+	
+	y <- x; y["W"] <- 10;
+	checkEquals(dframe(X=c(1, 2), W=c(10, 10), 
+		dimmeta=list(xda[[1L]], 
+			data.frame(labels=I(c("fc", NA)), units=I(c("m", NA))))), y,
+		"add colum with [i] syntax adds rows to colmeta");
+
+	y <- x; y[,"W"] <- 10;
+	checkEquals(dframe(X=c(1, 2), W=c(10, 10), 
+		dimmeta=list(xda[[1L]], 
+			data.frame(labels=I(c("fc", NA)), units=I(c("m", NA))))), y,
+		"add column with [,j] syntax adds rows to colmeta");
+
+	y <- x; y[3, 2] <- 5;
+	checkEquals(dframe(X=c(1, 2, NA), V2=c(NA, NA, 5), 
+		dimmeta=list(
+			data.frame(A=c(-1,-2,NA), B=I(c("x", "y", NA))), 
+			data.frame(labels=I(c("fc", NA)), units=I(c("m", NA))))), y,
+		"add row and column with [i, j] syntax add rows to row & colmeta");
+	
+	y <- x; y[1] <- NULL;
+	checkEquals(dframe(row.names=1:2, 
+			dimmeta=list(xda[[1L]], 
+			data.frame(labels=I(character(0)), units=I(character(0))))),
+    	y, "remove row with [i]<-NULL syntax also subsets rowmeta") 
+
+	y <- x; y[,1] <- NULL;
+	checkEquals(dframe(row.names=1:2, 
+			dimmeta=list(xda[[1L]], 
+			data.frame(labels=I(character(0)), units=I(character(0))))),
+		y, "remove row with [,j]<-NULL syntax also subsets colmeta");		
+		
 })
