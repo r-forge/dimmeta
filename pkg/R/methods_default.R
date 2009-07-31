@@ -150,6 +150,52 @@ metalength.default <- function(x) {
 	else length(x);	
 }
 
+#' @name metalengthReplace.default
+#' @nord
+#' @S3method `metalength<-` default
+
+`metalength<-.default` <- function(x, value) {
+	if (!is.numeric(value) || length(value) != 1L) 
+		stop("invalid length value");
+	value <- as.integer(value);
+	if (value < 0L)
+		stop("length cannot be negative");
+	
+	if (length(d <- dim(x))) {
+		nrows <- d[1L];
+		if (value > nrows) {
+			# abind() adds a "dimnames" attribute even if it is not
+			# present in x, so we just ensure dimnames are not modified
+			nodmn <- is.null(dimnames(x));
+			x <- abind(x, array(NA, c(value-nrows, d[-1L])), along=1L)
+			if (nodmn) dimanmes(x) <- NULL;
+		} else if (value < nrows) {
+			iargs <- sapply(d[-1L], function(y) if (y == 0L) 0L else TRUE);			
+			x <- do.call("[", c(list(i, seq_len(value)), iargs, drop=FALSE))		
+		} 
+	} else length(x) <- value;		
+	x;
+}
+
+#' @name metalengthReplace.default
+#' @nord
+#' @S3method `metalength<-` default
+
+`metalength<-.data.frame` <- function(x, value) {
+	if (!is.numeric(value) || length(value) != 1L) 
+		stop("invalid length value");
+	value <- as.integer(value);
+	if (value < 0L)
+		stop("length cannot be negative");
+
+	nrows <- nrow(x);
+	if (value > nrows)
+		x[value, ] <- NA
+	else if (value < nrows)
+		x <- x[seq_len(value),, drop=FALSE]
+	x;
+}
+
 #' @name metanamesReplace.default
 #' @nord
 #' @S3method `metanames<-` default
@@ -163,15 +209,58 @@ metalength.default <- function(x) {
 
 #' @nord
 #' @S3method metasubset default
+#' @note This method must enforce homogeneity of subsetting among different
+#' 	R data structures. Specifically, arrays should behave on their dim-data
+#'  releted dimension exactly as vectors do, allowing out-of-range indexes
+#'  that return NAs (by default, these indexes raise errors with arrays) 
 
 metasubset.default <- function(x, i, names, exact=TRUE) {
-	if (is.null(x)) return(NULL);	
-	if (is.character(i))		
+	if (is.null(x)) return(NULL);
+	metaLen <- metalength(x);
+	if (is.character(i)) {
+		if (missing(names))
+			if (is.null(names <- names(x)))				
+				stop("names are required for character index")
 		i <- if (exact) 
-			match(i, names, nomatch=0L) 
-		else pmatch(i, names, duplicates.ok=TRUE, nomatch=0L);
+			match(i, names, nomatch=metaLen+1) 
+		else pmatch(i, names, duplicates.ok=TRUE, nomatch=metaLen+1);
+	}
 	
-	if (is.null(dim(x)))
-		x[i]
-	else x[i,,drop=FALSE];
+	if (length(d <- dim(x))) {
+		isNew <- FALSE;
+		if (is.logical(i) && length(i) > metaLen) {
+			i <- which(i);
+			isNew <- (i > metaLen); 
+			i[isNew] <- metaLen + 1;
+		} else if (is.numeric(i))
+			if (any(isNew <- (as.integer(i) > metaLen)))
+				i[isNew] <- metaLen + 1
+		if (any(isNew)) {
+			# abind() adds a "dimnames" attribute even if it is not
+			# present in x, so we just ensure dimnames are not modified
+    		nodmn <- is.null(dimnames(x));
+			x <- abind(x, array(NA, c(sum(isNew), d[-1L])), along=1L)
+			if (nodmn) dimnames(x) <- NULL;
+		}
+		iargs <- sapply(d[-1L], function(y) if (y == 0L) 0L else TRUE);			
+		do.call("[", c(list(x, i), iargs, drop=FALSE));
+	} else x[i];
+}
+
+#' @nord
+#' @S3method metasubset data.frame
+
+metasubset.data.frame <- function(x, i, names, exact=TRUE) {
+	if (is.null(x)) return(NULL);
+	if (is.character(i)) {
+		metaLen <- metalength(x);
+		if (missing(names))
+			if (is.null(names <- names(x)))				
+				stop("names are required for character index")
+		i <- if (exact) 
+			match(i, names, nomatch=metaLen+1) 
+		else pmatch(i, names, duplicates.ok=TRUE, nomatch=metaLen+1);
+	}
+	
+	x[i,,drop=FALSE];		
 }

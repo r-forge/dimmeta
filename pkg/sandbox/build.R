@@ -35,12 +35,13 @@ toRm <- c(
 	"cbind.darray",
 	"dimReplace.darray",
 	"indexLenSelection",
-	"metalength.default",
-	"metasubset.default",
+	"metalength.default", "metalengthReplace", "metalengthReplace.default", 
+	"metasubset.default", "metasubset.data.frame",
 	"metanamesReplace.default",	
 	"metabind.default", "metabind.list", "metabind.matrix", 
 		"metabind.data.frame",
-	"as.dframe", "as.dframe.default", "as.dframe.dframe"
+	"as.dframe", "as.dframe.default", "as.dframe.dframe", 
+	"dframeReplace", "xpdrows.dframe"
 );
  
 unlink(file.path(devPath(), "man", paste(toRm, ".Rd", sep="")))

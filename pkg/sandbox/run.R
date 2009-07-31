@@ -8,10 +8,11 @@
 stop("not to be directly sourced!"); 
 
 library(DevTools);
-useDevLib();
-devPath(file.path("C:", "ebe", "Work", "Projects", "PaRiS_R", "dimmeta"));
+devPkg("dimmeta");
 
+#useDevLib();
 #library(ppTools)
+library(abind)
 
 s("generics.R")
 s("methods_default.R")

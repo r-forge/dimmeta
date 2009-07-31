@@ -57,12 +57,16 @@ colmeta <- function(x, ...) UseMethod("colmeta");
 unmeta <- function(x, ...) UseMethod("unmeta");
 
 #' Generic function used by dimension-sensitive metadata handling methods
-#' to find out the size of the metadata associated to the data object. 
+#' to find out or modify the size of the metadata associated to the data object. 
 #' 
-#' The default method returns 0 when \code{x} is \code{NULL},
+#' The default setter method returns 0 when \code{x} is \code{NULL},
 #' \code{length(x)} when \code{x} is an object without dimensions (such as a
 #' vector), and \code{dim(x)[1]} when \code{x} has a non-null
 #' \code{dim} attribute (e.g. arrays or data frames).
+#' 
+#' The replacement method is used mainly for extending the metadata when
+#' new items are added to the associated data object, filling new elements
+#' with adequate empty values (\code{NA}s, \code{NULL}s....)
 #' 
 #' New methods can be added for user-defined classes used for dimension
 #' metadata. 
@@ -70,10 +74,18 @@ unmeta <- function(x, ...) UseMethod("unmeta");
 #' @title Length of Dimension Metadata along the Data Object Extent
 #' @param x an object used to store dimension-sensitive metadata 
 #'  
-#' @return An integer number. 
+#' @return \code{metalength} returns an integer number. 
+#' 	\code{metalength<-} is invoked by its side effect of modifying the object
+#' 	length. 
 #' @export
 
 metalength <- function(x) UseMethod("metalength");
+
+#' @name metalengthReplace
+#' @nord
+#' @export
+
+`metalength<-` <- function(x, value) UseMethod("metalength<-");
 
 #' Generic function used to assign names to dimension-sensitive metadata
 #' along the extent associated to the data object.

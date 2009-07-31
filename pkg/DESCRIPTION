@@ -9,7 +9,7 @@ Maintainer: Enrique Bengoechea <enrique.bengoechea@credit-suisse.com>
 Description: Provides infrastructure to attach metadata attributes to
     arrays and data frames that evolve "along each dimension" and are
     kept through subsetting operations.
-Depends: R (>= 2.8.1)
+Depends: R (>= 2.8.1), abind
 Suggests: svUnit
 License: GPL-2
 LazyLoad: yes
